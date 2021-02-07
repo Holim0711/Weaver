@@ -15,7 +15,8 @@ class MyDataset(Dataset):
 
 class SimpleImageDataset(MyDataset):
 
-    def __init__(self, data, transform=None, target_transform=None):
+    def __init__(self, root, data, transform=None, target_transform=None):
+        self.root = root
         self.data = data
         self.transform = transform
         self.target_transform = target_transform
@@ -25,7 +26,7 @@ class SimpleImageDataset(MyDataset):
 
     def __getitem__(self, idx):
         x, y = self.data[idx]
-        x = Image.open(x)
+        x = Image.open(os.path.join(self.root, x))
         if self.transform:
             x = self.transform(x)
         if self.target_transform:
@@ -35,7 +36,8 @@ class SimpleImageDataset(MyDataset):
 
 class PandasImageDataset(MyDataset):
 
-    def __init__(self, df, transform=None, target_transform=None):
+    def __init__(self, root, df, transform=None, target_transform=None):
+        self.root = root
         self.df = df
         self.transform = transform
         self.target_transform = target_transform
@@ -45,7 +47,7 @@ class PandasImageDataset(MyDataset):
 
     def __getitem__(self, idx):
         x, y = self.df.iloc[idx]
-        x = Image.open(x)
+        x = Image.open(os.path.join(self.root, x))
         if self.transform:
             x = self.transform(x)
         if self.target_transform:

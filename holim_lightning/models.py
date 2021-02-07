@@ -1,9 +1,9 @@
 import torch
 from torchvision import models as torch_models
-from efficientnet_pytorch import EfficientNet
 
 
 def get_efficientnet(backbone, pretrained, **kwargs):
+    from efficientnet_pytorch import EfficientNet
     if pretrained:
         return EfficientNet.from_pretrained(backbone, **kwargs)
     else:
