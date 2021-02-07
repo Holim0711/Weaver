@@ -1,6 +1,4 @@
 import os
-from glob import glob
-import imghdr
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 
@@ -15,37 +13,41 @@ class MyDataset(Dataset):
             **kwargs)
 
 
+class SimpleImageDataset(MyDataset):
+
+    def __init__(self, data, transform=None, target_transform=None):
+        self.data = data
+        self.transform = transform
+        self.target_transform = target_transform
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        x, y = self.data[idx]
+        x = Image.open(x)
+        if self.transform:
+            x = self.transform(x)
+        if self.target_transform:
+            y = self.target_transform(y)
+        return x, y
+
+
 class PandasImageDataset(MyDataset):
 
-    def __init__(self, df, img_trfm=None, trg_trfm=None):
+    def __init__(self, df, transform=None, target_transform=None):
         self.df = df
-        self.img_trfm = img_trfm
-        self.trg_trfm = trg_trfm
+        self.transform = transform
+        self.target_transform = target_transform
 
     def __len__(self):
         return len(self.df)
 
     def __getitem__(self, idx):
-        path, trg = self.df.iloc[idx]
-        img = Image.open(path)
-        if self.img_trfm:
-            img = self.img_trfm(img)
-        if self.trg_trfm:
-            trg = self.trg_trfm(trg)
-        return img, trg
-
-
-class SimpleImageDataset(MyDataset):
-
-    def __init__(self, root, trfm):
-        filenames = glob(os.path.join(root, '**'), recursive=True)
-        filenames = [x for x in filenames if os.path.isfile(x)]
-        filenames = [x for x in filenames if imghdr.what(x)]
-        self.filenames = sorted(filenames)
-        self.trfm = trfm
-
-    def __len__(self):
-        return len(self.filenames)
-
-    def __getitem__(self, idx):
-        return self.trfm(Image.open(self.filenames[idx]))
+        x, y = self.df.iloc[idx]
+        x = Image.open(x)
+        if self.transform:
+            x = self.transform(x)
+        if self.target_transform:
+            y = self.target_transform(y)
+        return x, y
