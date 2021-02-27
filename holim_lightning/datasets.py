@@ -1,4 +1,5 @@
 import os
+import random
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 
@@ -11,6 +12,19 @@ class MyDataset(Dataset):
             num_workers=num_workers if num_workers else os.cpu_count(),
             pin_memory=pin_memory,
             **kwargs)
+
+
+class RandomSampleDataset(MyDataset):
+
+    def __init__(self, dataset, n):
+        self.dataset = dataset
+        self.indices = random.sample(range(len(self.dataset)), n)
+
+    def __len__(self):
+        return len(self.indices)
+
+    def __getitem__(self, idx):
+        return self.dataset[self.indices[idx]]
 
 
 class SimpleImageDataset(MyDataset):
