@@ -1,9 +1,14 @@
+import sys
 import torch
 from torchvision import models as torch_models
 
 
 def get_efficientnet(backbone, pretrained, **kwargs):
-    from efficientnet_pytorch import EfficientNet
+    try:
+        from efficientnet_pytorch import EfficientNet
+    except:
+        print('Run "pip install efficientnet_pytorch"', file=sys.stderr)
+        raise
     if pretrained:
         return EfficientNet.from_pretrained(backbone, **kwargs)
     else:

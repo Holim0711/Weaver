@@ -76,8 +76,8 @@ class ImageDataModule(pl.LightningDataModule):
     def setup(self, stage=None):
         train = pd.read_csv(os.path.join(self.prep_dir, 'train_split.tsv'), sep='\t', header=None)
         valid = pd.read_csv(os.path.join(self.prep_dir, 'valid_split.tsv'), sep='\t', header=None)
-        self.train_data = PandasImageDataset(train, self.train_trfm, self.target_trfm)
-        self.valid_data = PandasImageDataset(valid, self.valid_trfm, self.target_trfm)
+        self.train_data = PandasImageDataset('.', train, self.train_trfm, self.target_trfm)
+        self.valid_data = PandasImageDataset('.', valid, self.valid_trfm, self.target_trfm)
 
     def train_dataloader(self):
         return self.train_data.get_dataloader(
