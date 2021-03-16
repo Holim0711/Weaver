@@ -1,5 +1,8 @@
-from torch import optim as torch_optims
+import torch
 
 
-def get_optim(name):
-    return torch_optims.__dict__[name]
+def get_optim(params, name, **kwargs):
+    if name == 'AdaBound':
+        from adabound import AdaBound
+        return AdaBound(params, **kwargs)
+    return torch.optim.__dict__[name](params, **kwargs)

@@ -1,4 +1,4 @@
-from torch.optim import lr_scheduler as torch_scheds
+import torch
 import math
 
 
@@ -7,7 +7,7 @@ class ConstantLR(torch_scheds.LambdaLR):
         super().__init__(optimizer, lambda x: 1, last_epoch)
 
 
-class CosineAnnealingWarmUp(torch_scheds.LambdaLR):
+class CosineAnnealingWarmUp(torch.optim.lr_scheduler.LambdaLR):
     def __init__(self, optimizer, T_max, T_warm=0, last_epoch=-1):
         def lr_lambda(t):
             if t < T_warm:
@@ -17,9 +17,9 @@ class CosineAnnealingWarmUp(torch_scheds.LambdaLR):
         super().__init__(optimizer, lr_lambda, last_epoch)
 
 
-def get_sched(name):
+def get_sched(optimizer, name, **kwargs):
     if name is None:
-        return ConstantLR
+        return ConstantLR(optimizer, **kwargs)
     elif name == 'CosineAnnealingWarmUp':
-        return CosineAnnealingWarmUp
-    return torch_scheds.__dict__[name]
+        return CosineAnnealingWarmUp(optimizer, **kwargs)
+    return torch.optim.lr_scheduler.__dict__[name](optimizer, **kwargs)
