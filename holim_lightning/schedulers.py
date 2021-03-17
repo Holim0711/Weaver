@@ -2,7 +2,7 @@ import torch
 import math
 
 
-class ConstantLR(torch_scheds.LambdaLR):
+class ConstantLR(torch.optim.lr_scheduler.LambdaLR):
     def __init__(self, optimizer, last_epoch=-1):
         super().__init__(optimizer, lambda x: 1, last_epoch)
 
