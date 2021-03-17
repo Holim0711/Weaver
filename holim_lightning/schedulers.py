@@ -12,8 +12,10 @@ class CosineAnnealingWarmUp(torch.optim.lr_scheduler.LambdaLR):
         def lr_lambda(t):
             if t < T_warm:
                 return float(t) / float(T_warm)
-            θ = float(t - T_warm) / float(T_max - T_warm)
-            return 0.5 * (1 + math.cos(θ * math.pi))
+            elif t < T_max:
+                θ = float(t - T_warm) / float(T_max - T_warm)
+                return 0.5 * (1 + math.cos(θ * math.pi))
+            return 0.
         super().__init__(optimizer, lr_lambda, last_epoch)
 
 
