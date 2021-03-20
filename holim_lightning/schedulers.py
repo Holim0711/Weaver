@@ -9,6 +9,10 @@ class ConstantLR(torch.optim.lr_scheduler.LambdaLR):
 
 class CosineAnnealingWarmUp(torch.optim.lr_scheduler.LambdaLR):
     def __init__(self, optimizer, T_max, T_warm=0, T_mute=0, last_epoch=-1):
+        self.T_max = T_max
+        self.T_warm = T_warm
+        self.T_mute = T_mute
+
         def lr_lambda(t):
             if t < T_mute:
                 return 0
@@ -18,6 +22,7 @@ class CosineAnnealingWarmUp(torch.optim.lr_scheduler.LambdaLR):
                 θ = float(t - T_warm) / float(T_max - T_warm)
                 return 0.5 * (1 + math.cos(θ * math.pi))
             return 0.
+
         super().__init__(optimizer, lr_lambda, last_epoch)
 
 
