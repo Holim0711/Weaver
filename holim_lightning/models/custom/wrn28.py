@@ -35,9 +35,9 @@ class BasicBlock(nn.Module):
             return z + x
 
 
-def _make_layer(n, cᵢ, cₒ, stride, *args, **kwargs):
-    layers = [BasicBlock(cᵢ, cₒ, stride, *args, **kwargs)]
-    layers += [BasicBlock(cₒ, cₒ, 1, *args, **kwargs) for i in range(1, n)]
+def _make_layer(n, cᵢ, cₒ, stride=1, **kwargs):
+    layers = [BasicBlock(cᵢ, cₒ, stride=stride, **kwargs)]
+    layers += [BasicBlock(cₒ, cₒ, stride=1, **kwargs) for i in range(1, n)]
     return nn.Sequential(*layers)
 
 
@@ -56,15 +56,13 @@ class WideResNet(nn.Module):
         if relu_layer is None:
             relu_layer = nn.ReLU
 
-        # 1st conv before any network block
-        self.conv1 = nn.Conv2d(3, c[0], kernel_size=3, stride=1, padding=1, bias=False)
-        # 1st block
-        self.block1 = _make_layer(n, c[0], c[1], 1, block_dropout, norm_layer, relu_layer)
-        # 2nd block
-        self.block2 = _make_layer(n, c[1], c[2], 2, block_dropout, norm_layer, relu_layer)
-        # 3rd block
-        self.block3 = _make_layer(n, c[2], c[3], 2, block_dropout, norm_layer, relu_layer)
-        # global average pooling and classifier
+        self.conv = nn.Conv2d(3, c[0], kernel_size=3, stride=1, padding=1, bias=False)
+        self.block1 = _make_layer(
+            n, c[0], c[1], stride=1, dropout=block_dropout, norm_layer=norm_layer, relu_layer=relu_layer)
+        self.block2 = _make_layer(
+            n, c[1], c[2], stride=2, dropout=block_dropout, norm_layer=norm_layer, relu_layer=relu_layer)
+        self.block3 = _make_layer(
+            n, c[2], c[3], stride=2, dropout=block_dropout, norm_layer=norm_layer, relu_layer=relu_layer)
         self.bn = norm_layer(c[3])
         self.relu = relu_layer()
         self.pool = nn.AdaptiveAvgPool2d((1, 1))
@@ -83,7 +81,7 @@ class WideResNet(nn.Module):
                 nn.init.constant_(m.bias, 0.0)
 
     def forward(self, x):
-        out = self.conv1(x)
+        out = self.conv(x)
         out = self.block1(out)
         out = self.block2(out)
         out = self.block3(out)
