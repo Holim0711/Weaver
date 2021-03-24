@@ -1,7 +1,7 @@
 import sys
 import torch
 from torchvision import models as torch_models
-from .scratch.wide_resnet import build_wideresnet
+from .custom.wrn28 import build_wide_resnet28
 
 
 def get_efficientnet(backbone, pretrained, **kwargs):
@@ -24,8 +24,8 @@ def get_model(backbone, num_classes, pretrained=True, **kwargs):
     if backbone.startswith('efficientnet'):
         model = get_efficientnet(backbone, pretrained, num_classes=num_classes)
     elif backbone.startswith('wide_resnet28'):
-        assert pretrained == False
-        return build_wideresnet(backbone, num_classes, **kwargs)
+        assert not pretrained, "only custom models available"
+        return build_wide_resnet28(backbone, num_classes, **kwargs)
     else:
         model = get_torch_model(backbone, pretrained)
         model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
