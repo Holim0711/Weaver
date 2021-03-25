@@ -1,11 +1,14 @@
-# original: https://github.com/szagoruyko/wide-residual-networks/blob/master/pytorch/resnet.py
+# original: https://github.com/google-research/fixmatch/blob/master/libml/models.py
 import torch
 import torch.nn as nn
 
 
 class BasicBlock(nn.Module):
-    def __init__(self, cᵢ, cₒ, stride=1, dropout=0., norm_layer=None, relu_layer=None):
+    def __init__(self, cᵢ, cₒ, stride=1, dropout=0.,
+                 norm_layer=None, relu_layer=None, activate_before_residual=False):
         super().__init__()
+
+        self.activate_before_residual = activate_before_residual
 
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -26,19 +29,22 @@ class BasicBlock(nn.Module):
             self.convdim = nn.Conv2d(cᵢ, cₒ, kernel_size=1, stride=stride, padding=0, bias=False)
 
     def forward(self, x):
-        o1 = self.relu0(self.bn0(x))
-        y = self.conv0(o1)
-        o2 = self.relu1(self.bn1(y))
-        z = self.conv1(self.drop(o2))
+        z = self.relu0(self.bn0(x))
+        if self.activate_before_residual:
+            x = z
+        z = self.conv0(z)
+        z = self.relu1(self.bn1(z))
+        z = self.conv1(self.drop(z))
         if self.convdim is not None:
-            return z + self.convdim(o1)
-        else:
-            return z + x
+            x = self.convdim(x)
+        return x + z
 
 
-def _make_layer(n, cᵢ, cₒ, stride=1, **kwargs):
-    layers = [BasicBlock(cᵢ, cₒ, stride=stride, **kwargs)]
-    layers += [BasicBlock(cₒ, cₒ, stride=1, **kwargs) for i in range(1, n)]
+def _make_layer(n, cᵢ, cₒ, **kwargs):
+    layers = [BasicBlock(cᵢ, cₒ, **kwargs)]
+    kwargs['stride'] = 1
+    kwargs['activate_before_residual'] = False
+    layers += [BasicBlock(cₒ, cₒ, **kwargs) for i in range(1, n)]
     return nn.Sequential(*layers)
 
 
@@ -59,11 +65,14 @@ class WideResNet(nn.Module):
 
         self.conv = nn.Conv2d(3, c[0], kernel_size=3, stride=1, padding=1, bias=False)
         self.block1 = _make_layer(
-            n, c[0], c[1], stride=1, dropout=block_dropout, norm_layer=norm_layer, relu_layer=relu_layer)
+            n, c[0], c[1], stride=1, dropout=block_dropout,
+            norm_layer=norm_layer, relu_layer=relu_layer, activate_before_residual=True)
         self.block2 = _make_layer(
-            n, c[1], c[2], stride=2, dropout=block_dropout, norm_layer=norm_layer, relu_layer=relu_layer)
+            n, c[1], c[2], stride=2, dropout=block_dropout,
+            norm_layer=norm_layer, relu_layer=relu_layer)
         self.block3 = _make_layer(
-            n, c[2], c[3], stride=2, dropout=block_dropout, norm_layer=norm_layer, relu_layer=relu_layer)
+            n, c[2], c[3], stride=2, dropout=block_dropout,
+            norm_layer=norm_layer, relu_layer=relu_layer)
         self.bn = norm_layer(c[3])
         self.relu = relu_layer()
         self.pool = nn.AdaptiveAvgPool2d((1, 1))
@@ -92,10 +101,10 @@ class WideResNet(nn.Module):
         return self.fc(self.drop(out))
 
 
-def build_wide_resnet28(name, num_classes, **kwargs):
-    if name == "wide_resnet28_2":
+def build_wide_resnet28_tf(name, num_classes, **kwargs):
+    if name == "wide_resnet28_2_tf":
         depth, width = 28, 2
-    elif name == 'wide_resnet28_8':
+    elif name == 'wide_resnet28_8_tf':
         depth, width = 28, 8
     else:
         raise ValueError(f"Unsupported model: {name}")
