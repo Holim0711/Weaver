@@ -26,14 +26,13 @@ class BasicBlock(nn.Module):
             self.convdim = nn.Conv2d(cᵢ, cₒ, kernel_size=1, stride=stride, padding=0, bias=False)
 
     def forward(self, x):
-        o1 = self.relu0(self.bn0(x))
-        y = self.conv0(o1)
-        o2 = self.relu1(self.bn1(y))
-        z = self.conv1(self.drop(o2))
+        a = self.relu0(self.bn0(x))
+        z = self.conv0(a)
+        z = self.relu1(self.bn1(z))
+        z = self.conv1(self.drop(z))
         if self.convdim is not None:
-            return z + self.convdim(o1)
-        else:
-            return z + x
+            x = self.convdim(a)
+        return z + x
 
 
 def _make_layer(n, cᵢ, cₒ, stride=1, **kwargs):
