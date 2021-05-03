@@ -30,6 +30,12 @@ model = get_model('custom', 'wide_resnet28_2_tf')  # all custom models are not p
 - lukemelas: https://github.com/lukemelas/EfficientNet-PyTorch
 - custom: This Repository!
 
+### Custom Model List
+- `'wide_resnet28_2'`
+- `'wide_resnet28_8'`
+- `'wide_resnet28_2_tf'`
+- `'wide_resnet28_8_tf'`
+
 ## Optimizers
 ### Usage
 

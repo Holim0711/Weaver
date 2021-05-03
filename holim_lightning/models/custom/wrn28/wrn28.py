@@ -91,7 +91,7 @@ class WideResNet(nn.Module):
         return self.fc(self.drop(out))
 
 
-def build_wide_resnet28(name, num_classes, **kwargs):
+def build_wide_resnet28(name, num_classes=10, **kwargs):
     if name == "wide_resnet28_2":
         depth, width = 28, 2
     elif name == 'wide_resnet28_8':
