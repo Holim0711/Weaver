@@ -101,11 +101,31 @@ class WideResNet(nn.Module):
         return self.fc(self.drop(out))
 
 
+class FixMatchBatchNorm(torch.nn.BatchNorm2d):
+    def __init__(self, num_features):
+        super().__init__(num_features, momentum=0.001)
+
+
+class FixMatchReLU(torch.nn.LeakyReLU):
+    def __init__(self):
+        super().__init__(0.1, inplace=True)
+
+
 def build_wide_resnet28_tf(name, num_classes=10, **kwargs):
+    kwargs['depth'] = 28
+
     if name == "wide_resnet28_2_tf":
-        depth, width = 28, 2
+        kwargs['width'] = 2
     elif name == 'wide_resnet28_8_tf':
-        depth, width = 28, 8
+        kwargs['width'] = 8
+    elif name == "wide_resnet28_2_fixmatch":
+        kwargs['width'] = 2
+        kwargs['norm_layer'] = FixMatchBatchNorm
+        kwargs['relu_layer'] = FixMatchReLU
+    elif name == 'wide_resnet28_8_fixmatch':
+        kwargs['width'] = 8
+        kwargs['norm_layer'] = FixMatchBatchNorm
+        kwargs['relu_layer'] = FixMatchReLU
     else:
         raise ValueError(f"Unsupported model: {name}")
-    return WideResNet(num_classes, depth, width, **kwargs)
+    return WideResNet(num_classes, **kwargs)
