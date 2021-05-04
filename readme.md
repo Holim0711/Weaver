@@ -35,6 +35,8 @@ model = get_model('custom', 'wide_resnet28_2_tf')  # all custom models are not p
 - `'wide_resnet28_8'`
 - `'wide_resnet28_2_tf'`
 - `'wide_resnet28_8_tf'`
+- `'wide_resnet28_2_fixmatch'`
+- `'wide_resnet28_8_fixmatch'`
 
 ## Optimizers
 ### Usage
