@@ -109,7 +109,7 @@ class FixMatchReLU(torch.nn.LeakyReLU):
         super().__init__(0.1, inplace=True)
 
 
-def build_wide_resnet28_tf(name, num_classes=10, **kwargs):
+def build_wide_resnet28(name, num_classes=10, **kwargs):
     kwargs['depth'] = 28
 
     if name == "wide_resnet28_2_tf":
