@@ -1,6 +1,3 @@
-import torch
-
-
 def get_optim(param, name, **kwargs):
     if name == 'AdaBound':
         from adabound import AdaBound
@@ -9,6 +6,7 @@ def get_optim(param, name, **kwargs):
         from pl_bolts.optimizers import LARS
         Optimizer = LARS
     else:
+        import torch
         Optimizer = torch.optim.__dict__[name]
 
     return Optimizer(param, **kwargs)
