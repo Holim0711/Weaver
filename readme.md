@@ -13,16 +13,17 @@ sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10,
 ```
 
 
-## Models
+## Models & Encoders
+### Prototypes
+- `get_model(src, name, pretrained=False, **kwargs)`
+- `get_encoder(src, name, pretrained=False, **kwargs)`
+
 ### Usage
-
-Prototype: `get_model(src, name, pretrained=False, **kwargs)`
-
 ```
 from holim_lightning.models import get_model
 model = get_model('torchvision', 'resnet50', pretrained=False)
 model = get_model('lukemelas', 'efficientnet-b0', pretrained=True)
-model = get_model('custom', 'wide_resnet28_2_tf')  # all custom models are not pretrained.
+model = get_model('custom', 'wide_resnet28_2')  # all custom models are not pretrained.
 ```
 
 ### Source List
@@ -31,12 +32,7 @@ model = get_model('custom', 'wide_resnet28_2_tf')  # all custom models are not p
 - custom: This Repository!
 
 ### Custom Model List
-- `'wide_resnet28_2'`
-- `'wide_resnet28_8'`
-- `'wide_resnet28_2_tf'`
-- `'wide_resnet28_8_tf'`
-- `'wide_resnet28_2_fixmatch'`
-- `'wide_resnet28_8_fixmatch'`
+- `'wide_resnet28_{width}'`
 
 ## Optimizers
 ### Usage
