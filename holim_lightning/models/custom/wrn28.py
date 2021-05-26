@@ -109,12 +109,12 @@ class FixMatchReLU(torch.nn.LeakyReLU):
         super().__init__(0.1, inplace=True)
 
 
-def build_wide_resnet28(name, num_classes=10, **kwargs):
+def build_wide_resnet28(name, num_classes=10, fixmatch=False, **kwargs):
     assert 'wide_resnet28' in name
     kwargs['depth'] = 28
     kwargs['width'] = int(name.rsplit('_', 1)[1])
 
-    if 'fixmatch' in name:
+    if fixmatch is True:
         kwargs['norm_layer'] = FixMatchBatchNorm
         kwargs['relu_layer'] = FixMatchReLU
 
