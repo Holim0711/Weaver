@@ -110,20 +110,12 @@ class FixMatchReLU(torch.nn.LeakyReLU):
 
 
 def build_wide_resnet28(name, num_classes=10, **kwargs):
+    assert 'wide_resnet28' in name
     kwargs['depth'] = 28
+    kwargs['width'] = int(name.rsplit('_', 1)[1])
 
-    if name == "wide_resnet28_2_tf":
-        kwargs['width'] = 2
-    elif name == 'wide_resnet28_8_tf':
-        kwargs['width'] = 8
-    elif name == "wide_resnet28_2_fixmatch":
-        kwargs['width'] = 2
+    if 'fixmatch' in name:
         kwargs['norm_layer'] = FixMatchBatchNorm
         kwargs['relu_layer'] = FixMatchReLU
-    elif name == 'wide_resnet28_8_fixmatch':
-        kwargs['width'] = 8
-        kwargs['norm_layer'] = FixMatchBatchNorm
-        kwargs['relu_layer'] = FixMatchReLU
-    else:
-        raise ValueError(f"Unsupported model: {name}")
+
     return WideResNet(num_classes, **kwargs)
