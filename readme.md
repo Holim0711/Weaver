@@ -17,6 +17,7 @@ sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10,
 ### Prototypes
 - `get_model(src, name, pretrained=False, **kwargs)`
 - `get_encoder(src, name, pretrained=False, **kwargs)`
+- Encoders are models without the last fully-connected layer
 
 ### Usage
 ```
