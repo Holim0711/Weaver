@@ -3,6 +3,12 @@ import random
 from PIL import Image
 import torch
 
+__all__ = [
+    'Dataset',
+    'RandomSubset',
+    'SimpleImageDataset',
+]
+
 
 class Dataset(torch.utils.data.Dataset):
     def get_dataloader(self, batch_size, shuffle=False, num_workers=None, pin_memory=True, **kwargs):
@@ -15,8 +21,7 @@ class Dataset(torch.utils.data.Dataset):
             **kwargs)
 
 
-class RandomSampleDataset(Dataset):
-
+class RandomSubset(Dataset):
     def __init__(self, dataset, n):
         self.dataset = dataset
         self.indices = random.sample(range(len(self.dataset)), n)
@@ -29,42 +34,40 @@ class RandomSampleDataset(Dataset):
 
 
 class SimpleImageDataset(Dataset):
+    def __init__(self, root, data, reader=None, transform=None, target_transform=None):
+        """ Simple Image Dataset
 
-    def __init__(self, root, data, transform=None, target_transform=None):
+        Args
+            - root (str): root path
+            - data (list): `x, y = data[i]`
+            - reader (func): `x = reader(root, x)`
+            - transform (func): `x = transform(x)`
+            - target_transform (func): `y = target_transform(y)`
+        """
         self.root = root
         self.data = data
+        self.reader = reader
         self.transform = transform
         self.target_transform = target_transform
 
     def __len__(self):
         return len(self.data)
 
+    def read_item(self, x):
+        if self.reader:
+            return self.reader(self.root, x)
+        else:
+            return Image.open(os.path.join(self.root, x))
+
     def __getitem__(self, idx):
         x, y = self.data[idx]
-        x = Image.open(os.path.join(self.root, x))
+
+        x = self.read_item(x)
+
         if self.transform:
             x = self.transform(x)
+
         if self.target_transform:
             y = self.target_transform(y)
-        return x, y
 
-
-class PandasImageDataset(Dataset):
-
-    def __init__(self, root, df, transform=None, target_transform=None):
-        self.root = root
-        self.df = df
-        self.transform = transform
-        self.target_transform = target_transform
-
-    def __len__(self):
-        return len(self.df)
-
-    def __getitem__(self, idx):
-        x, y = self.df.iloc[idx]
-        x = Image.open(os.path.join(self.root, x))
-        if self.transform:
-            x = self.transform(x)
-        if self.target_transform:
-            y = self.target_transform(y)
         return x, y
