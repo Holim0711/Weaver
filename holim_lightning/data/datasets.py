@@ -1,20 +1,21 @@
 import os
 import random
 from PIL import Image
-from torch.utils.data import Dataset, DataLoader
+import torch
 
 
-class MyDataset(Dataset):
-    def get_dataloader(self, batch_size, num_workers=None, pin_memory=True, **kwargs):
-        return DataLoader(
+class Dataset(torch.utils.data.Dataset):
+    def get_dataloader(self, batch_size, shuffle=False, num_workers=None, pin_memory=True, **kwargs):
+        return torch.utils.data.DataLoader(
             self,
             batch_size=batch_size,
+            shuffle=shuffle,
             num_workers=num_workers if num_workers else os.cpu_count(),
             pin_memory=pin_memory,
             **kwargs)
 
 
-class RandomSampleDataset(MyDataset):
+class RandomSampleDataset(Dataset):
 
     def __init__(self, dataset, n):
         self.dataset = dataset
@@ -27,7 +28,7 @@ class RandomSampleDataset(MyDataset):
         return self.dataset[self.indices[idx]]
 
 
-class SimpleImageDataset(MyDataset):
+class SimpleImageDataset(Dataset):
 
     def __init__(self, root, data, transform=None, target_transform=None):
         self.root = root
@@ -48,7 +49,7 @@ class SimpleImageDataset(MyDataset):
         return x, y
 
 
-class PandasImageDataset(MyDataset):
+class PandasImageDataset(Dataset):
 
     def __init__(self, root, df, transform=None, target_transform=None):
         self.root = root
