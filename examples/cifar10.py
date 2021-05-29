@@ -34,6 +34,7 @@ class Module(pl.LightningModule):
     def training_epoch_end(self, outputs):
         loss = torch.stack([x['loss'] for x in outputs]).mean()
         acc = self.train_acc.compute()
+        self.train_acc.reset()
         self.log_dict({
             'train/loss': loss,
             'train/acc': acc,
@@ -50,6 +51,7 @@ class Module(pl.LightningModule):
     def validation_epoch_end(self, outputs):
         loss = torch.stack([x['loss'] for x in outputs]).mean()
         acc = self.valid_acc.compute()
+        self.valid_acc.reset()
         self.log_dict({
             'valid/loss': loss,
             'valid/acc': acc,
@@ -71,7 +73,7 @@ class Module(pl.LightningModule):
 
 def run(hparams):
     transform_train = transforms.Compose([
-        RandAugment(2, 10, color=tuple((cifar10_μ * 256).to(int).tolist())),
+        RandAugment(3, 5, color=tuple((cifar10_μ * 256).to(int).tolist())),
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
@@ -86,10 +88,10 @@ def run(hparams):
     dataset_valid = datasets.CIFAR10(
         './data', train=False, transform=transform_valid, download=True)
     dataloader_train = torch.utils.data.DataLoader(
-        dataset_train, batch_size=128,
+        dataset_train, batch_size=hparams['dataset']['batch_size'],
         shuffle=True, num_workers=os.cpu_count(), pin_memory=True)
     dataloader_valid = torch.utils.data.DataLoader(
-        dataset_valid, batch_size=128,
+        dataset_valid, batch_size=hparams['dataset']['batch_size'],
         shuffle=False, num_workers=os.cpu_count(), pin_memory=True)
 
     pl_module = Module(**hparams)

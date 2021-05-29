@@ -84,19 +84,23 @@ def Solarize(img, v, **kwargs):
 
 
 def Color(img, v, **kwargs):
-    return PIL.ImageEnhance.Color(img).enhance(1. - v)
+    v = _random_flip(v)
+    return PIL.ImageEnhance.Color(img).enhance(1 + v)
 
 
 def Contrast(img, v, **kwargs):
-    return PIL.ImageEnhance.Contrast(img).enhance(1. - v)
+    v = _random_flip(v)
+    return PIL.ImageEnhance.Contrast(img).enhance(1 + v)
 
 
 def Brightness(img, v, **kwargs):
-    return PIL.ImageEnhance.Brightness(img).enhance(1. - v)
+    v = _random_flip(v)
+    return PIL.ImageEnhance.Brightness(img).enhance(1 + v)
 
 
 def Sharpness(img, v, **kwargs):
-    return PIL.ImageEnhance.Sharpness(img).enhance(1. - v)
+    v = _random_flip(v)
+    return PIL.ImageEnhance.Sharpness(img).enhance(1 + v)
 
 
 def Rotate(img, v, color='black'):
