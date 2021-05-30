@@ -78,21 +78,3 @@ class WideResNet(nn.Module):
         out = self.pool(out)
         out = self.flatten(out)
         return self.fc(self.drop(out))
-
-
-class FixMatchBatchNorm(torch.nn.BatchNorm2d):
-    def __init__(self, num_features):
-        super().__init__(num_features, momentum=0.001)
-
-
-class FixMatchReLU(torch.nn.LeakyReLU):
-    def __init__(self):
-        super().__init__(0.1, inplace=True)
-
-
-def convert_relu_to_softplus(model):
-    for child_name, child in model.named_children():
-        if isinstance(child, nn.ReLU):
-            setattr(model, child_name, nn.Softplus())
-        else:
-            convert_relu_to_softplus(child)
