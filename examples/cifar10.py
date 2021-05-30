@@ -92,7 +92,7 @@ class Module(pl.LightningModule):
 def run(hparams):
     transform_train = transforms.Compose([
         # RandAugment(3, 5, color=tuple((cifar10_μ * 256).to(int).tolist())),
-        transforms.RandomCrop(32, padding=4),
+        transforms.RandomCrop(32, padding=4, padding_mode="reflect"),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(cifar10_μ, cifar10_σ),
@@ -122,7 +122,7 @@ def run(hparams):
         **hparams['trainer'])
 
     trainer.fit(pl_module, dataloader_train, dataloader_valid)
-    trainer.test(pl_module, dataloader_valid)
+    trainer.test(test_dataloaders=dataloader_valid)
 
 
 if __name__ == "__main__":
@@ -143,12 +143,16 @@ if __name__ == "__main__":
             'nesterov': True
         },
         'scheduler': {
-            'name': 'LinearWarmupCosineAnnealingLR',
-            'warmup_epochs': 5 * 391,
-            'max_epochs': 200 * 391
+            # 'name': 'LinearWarmupCosineAnnealingLR',
+            # 'warmup_epochs': 5 * 391,
+            # 'max_epochs': 200 * 391
+            'name': 'MultiStepLR',
+            'milestones': [60, 120, 160],
+            'gamma': 0.2
         },
         'lr_dict': {
-            'interval': 'step',
+            # 'interval': 'step',
+            'interval': 'epoch',
             'frequency': 1
         },
         'trainer': {
