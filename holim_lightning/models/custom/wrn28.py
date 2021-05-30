@@ -48,7 +48,7 @@ class WideResNet(nn.Module):
         c = [16, 16 * width, 32 * width, 64 * width]
 
         self.conv = nn.Conv2d(3, c[0], 3, 1, 1, bias=False)
-        self.block1 = _make_layer(n, c[0], c[1], 1, dropout=dropout, act_first=True)
+        self.block1 = _make_layer(n, c[0], c[1], 1, dropout=dropout)  # , act_first=True)
         self.block2 = _make_layer(n, c[1], c[2], 2, dropout=dropout)
         self.block3 = _make_layer(n, c[2], c[3], 2, dropout=dropout)
         self.bn = nn.BatchNorm2d(c[3])
