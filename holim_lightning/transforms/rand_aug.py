@@ -8,7 +8,7 @@ __all__ = [
 
 
 class RandAugment:
-    QUANTIZE_LEVEL = 30
+    QUANTIZE_LEVEL = 10
 
     DEFAULT_AUGMENT_LIST = [
         ('Identity',      0, 0),
@@ -16,22 +16,20 @@ class RandAugment:
         ('Equalize',      0, 0),
         ('Invert',        0, 0),
         ('Posterize',     0, 4),
-        ('Solarize',      0, 110),
+        ('Solarize',      0, 256),
         ('Color',         0, 0.9),
         ('Contrast',      0, 0.9),
         ('Brightness',    0, 0.9),
         ('Sharpness',     0, 0.9),
         ('Rotate',        0, 30),
-        ('TranslateX',    0, 0.33),
-        ('TranslateY',    0, 0.33),
+        ('TranslateX',    0, 0.45),
+        ('TranslateY',    0, 0.45),
         ('ShearX',        0, 0.3),
         ('ShearY',        0, 0.3),
         ('Cutout',        0, 0.2),
     ]
 
     def __init__(self, n, m, augment_list=None, color='black'):
-        assert n >= 1
-        assert 1 <= m <= self.QUANTIZE_LEVEL
         self.n = int(n)
         self.m = int(m)
         if augment_list is None:
@@ -53,8 +51,6 @@ class RandAugment:
 
 
 class RandAugmentUDA(RandAugment):
-    QUANTIZE_LEVEL = 10
-
     DEFAULT_AUGMENT_LIST = [
         ('Identity',      0, 0),
         ('AutoContrast',  0, 0),

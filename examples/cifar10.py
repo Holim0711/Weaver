@@ -23,6 +23,7 @@ class Module(pl.LightningModule):
         self.criterion = torch.nn.CrossEntropyLoss()
         self.train_acc = torchmetrics.Accuracy()
         self.valid_acc = torchmetrics.Accuracy()
+        self.test_acc = torchmetrics.Accuracy()
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -58,6 +59,23 @@ class Module(pl.LightningModule):
             'step': self.current_epoch,
         })
 
+    def test_step(self, batch, batch_idx):
+        x, y = batch
+        z = self.model(x)
+        loss = self.criterion(z, y)
+        self.test_acc.update(z.softmax(dim=-1), y)
+        return {'loss': loss}
+
+    def test_epoch_end(self, outputs):
+        loss = torch.stack([x['loss'] for x in outputs]).mean()
+        acc = self.test_acc.compute()
+        self.test_acc.reset()
+        self.log_dict({
+            'test/loss': loss,
+            'test/acc': acc,
+            'step': self.current_epoch,
+        })
+
     def configure_optimizers(self):
         optim = get_optim(exclude_wd(self), **self.hparams.optimizer)
         sched = get_sched(optim, **self.hparams.scheduler)
@@ -73,7 +91,7 @@ class Module(pl.LightningModule):
 
 def run(hparams):
     transform_train = transforms.Compose([
-        RandAugment(3, 5, color=tuple((cifar10_μ * 256).to(int).tolist())),
+        # RandAugment(3, 5, color=tuple((cifar10_μ * 256).to(int).tolist())),
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
@@ -98,12 +116,13 @@ def run(hparams):
 
     trainer = pl.Trainer(
         callbacks=[
-            ModelCheckpoint(save_top_k=None, monitor=None),
+            ModelCheckpoint(save_top_k=1, monitor='valid/acc'),
             LearningRateMonitor(logging_interval=hparams['lr_dict']['interval']),
         ],
         **hparams['trainer'])
 
     trainer.fit(pl_module, dataloader_train, dataloader_valid)
+    trainer.test(pl_module, dataloader_valid)
 
 
 if __name__ == "__main__":
@@ -125,7 +144,7 @@ if __name__ == "__main__":
         },
         'scheduler': {
             'name': 'LinearWarmupCosineAnnealingLR',
-            'warmup_epochs': 10 * 391,
+            'warmup_epochs': 5 * 391,
             'max_epochs': 200 * 391
         },
         'lr_dict': {
