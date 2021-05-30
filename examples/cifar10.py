@@ -77,7 +77,7 @@ class Module(pl.LightningModule):
         })
 
     def configure_optimizers(self):
-        optim = get_optim(exclude_wd(self), **self.hparams.optimizer)
+        optim = get_optim(self, **self.hparams.optimizer)
         sched = get_sched(optim, **self.hparams.scheduler)
         return {
             'optimizer': optim,
