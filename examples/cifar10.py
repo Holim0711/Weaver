@@ -19,8 +19,8 @@ class Module(pl.LightningModule):
         self.model = get_model(**self.hparams.model)
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = torch.nn.ModuleDict({
-            'training': torchmetrics.Accuracy(),
-            'validation': torchmetrics.Accuracy(),
+            'trn': torchmetrics.Accuracy(),
+            'val': torchmetrics.Accuracy(),
             'test': torchmetrics.Accuracy(),
         })
 
@@ -42,16 +42,16 @@ class Module(pl.LightningModule):
         self.accuracy[phase].reset()
 
     def training_step(self, batch, batch_idx):
-        return self.shared_step('training', batch)
+        return self.shared_step('trn', batch)
 
     def training_epoch_end(self, outputs):
-        self.shared_epoch_end('training', outputs)
+        self.shared_epoch_end('trn', outputs)
 
     def validation_step(self, batch, batch_idx):
-        return self.shared_step('validataion', batch)
+        return self.shared_step('val', batch)
 
     def validation_epoch_end(self, outputs):
-        self.shared_epoch_end('validataion', outputs)
+        self.shared_epoch_end('val', outputs)
 
     def test_step(self, batch, batch_idx):
         return self.shared_step('test', batch)
@@ -74,7 +74,7 @@ class Module(pl.LightningModule):
 
 def run(hparams):
     transform_train = transforms.Compose([
-        RandAugment(**hparams['rand_augment'], color=[125, 123, 114]),
+        RandAugment(**hparams['rand_augment'], fillcolor=[125, 123, 114]),
         transforms.RandomCrop(32, padding=4, padding_mode="reflect"),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
@@ -101,7 +101,7 @@ def run(hparams):
 
     trainer = pl.Trainer(
         callbacks=[
-            ModelCheckpoint(save_top_k=1, monitor='validataion/acc'),
+            ModelCheckpoint(save_top_k=1, monitor='val/acc'),
             LearningRateMonitor(logging_interval=hparams['lr_dict']['interval']),
         ],
         **hparams['trainer'])
