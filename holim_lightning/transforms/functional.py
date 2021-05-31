@@ -55,8 +55,8 @@ def _random_flip(v):
     return v if random() < 0.5 else -v
 
 
-def _affine(img, matrix, color):
-    return img.transform(img.size, PIL.Image.AFFINE, matrix, fillcolor=color)
+def _affine(img, matrix, fillcolor):
+    return img.transform(img.size, PIL.Image.AFFINE, matrix, fillcolor=fillcolor)
 
 
 def Identity(img, _, **kwargs):
@@ -103,32 +103,32 @@ def Sharpness(img, v, **kwargs):
     return PIL.ImageEnhance.Sharpness(img).enhance(1 + v)
 
 
-def Rotate(img, v, color='black'):
+def Rotate(img, v, fillcolor='black'):
     v = _random_flip(v)
-    return img.rotate(v, fillcolor=color)
+    return img.rotate(v, fillcolor=fillcolor)
 
 
-def TranslateX(img, v, color='black'):
+def TranslateX(img, v, fillcolor='black'):
     v = _random_flip(v * img.size[0])
-    return _affine(img, (1, 0, v, 0, 1, 0), color)
+    return _affine(img, (1, 0, v, 0, 1, 0), fillcolor)
 
 
-def TranslateY(img, v, color='black'):
+def TranslateY(img, v, fillcolor='black'):
     v = _random_flip(v * img.size[1])
-    return _affine(img, (1, 0, 0, 0, 1, v), color)
+    return _affine(img, (1, 0, 0, 0, 1, v), fillcolor)
 
 
-def ShearX(img, v, color='black'):
+def ShearX(img, v, fillcolor='black'):
     v = _random_flip(v)
-    return _affine(img, (1, v, 0, 0, 1, 0), color)
+    return _affine(img, (1, v, 0, 0, 1, 0), fillcolor)
 
 
-def ShearY(img, v, color='black'):
+def ShearY(img, v, fillcolor='black'):
     v = _random_flip(v)
-    return _affine(img, (1, 0, 0, v, 1, 0), color)
+    return _affine(img, (1, 0, 0, v, 1, 0), fillcolor)
 
 
-def Cutout(img, v, color='black'):
+def Cutout(img, v, fillcolor='black'):
     w, h = img.size
     xc = random()
     yc = random()
@@ -137,5 +137,5 @@ def Cutout(img, v, color='black'):
     x1 = int(min(w, w * (xc + (v / 2))))
     y1 = int(min(h, h * (yc + (v / 2))))
     img = img.copy()
-    PIL.ImageDraw.Draw(img).rectangle((x0, y0, x1, y1), color)
+    PIL.ImageDraw.Draw(img).rectangle((x0, y0, x1, y1), fillcolor)
     return img

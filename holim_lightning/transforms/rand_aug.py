@@ -1,3 +1,4 @@
+from typing import Iterable
 from . import functional as f
 import random
 
@@ -31,15 +32,19 @@ class RandAugment:
         ('Cutout',        0, 0.181),  # (60/331)
     ]
 
-    def __init__(self, n, m, augment_list=None, color='black'):
+    def __init__(self, n, m, augment_list=None, fillcolor='black'):
         self.n = int(n)
         self.m = int(m)
-        self.augment_list = augment_list if augment_list else self.DEFAULT_AUGMENT_LIST
-        self.color = color
+        self.augment_list = augment_list
+        self.fillcolor = fillcolor
+        if augment_list is None:
+            self.augment_list = self.DEFAULT_AUGMENT_LIST
+        if isinstance(fillcolor, Iterable):
+            self.fillcolor = tuple(fillcolor)
         f.check_augment_min_max(self.augment_list)
 
     def transform(self, img, op, v):
-        return f.__dict__[op](img, v, color=self.color)
+        return f.__dict__[op](img, v, fillcolor=self.fillcolor)
 
     def __call__(self, img):
         ops = random.choices(self.augment_list, k=self.n)
