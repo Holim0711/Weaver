@@ -19,33 +19,33 @@ class Module(pl.LightningModule):
         self.model = get_model(**self.hparams.model)
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = torch.nn.ModuleDict({
-            'trn': torchmetrics.Accuracy(),
-            'val': torchmetrics.Accuracy(),
-            'test': torchmetrics.Accuracy(),
+            '_train': torchmetrics.Accuracy(),
+            '_val': torchmetrics.Accuracy(),
+            '_test': torchmetrics.Accuracy(),
         })
 
     def shared_step(self, phase, batch):
         x, y = batch
         z = self.model(x)
         loss = self.criterion(z, y)
-        self.accuracy[phase].update(z.softmax(dim=-1), y)
+        self.accuracy['_' + phase].update(z.softmax(dim=-1), y)
         return {'loss': loss}
 
     def shared_epoch_end(self, phase, outputs):
         loss = torch.stack([x['loss'] for x in outputs]).mean()
-        acc = self.accuracy[phase].compute()
+        acc = self.accuracy['_' + phase].compute()
         self.log_dict({
             f'{phase}/loss': loss,
             f'{phase}/acc': acc,
             'step': self.current_epoch,
         })
-        self.accuracy[phase].reset()
+        self.accuracy['_' + phase].reset()
 
     def training_step(self, batch, batch_idx):
-        return self.shared_step('trn', batch)
+        return self.shared_step('train', batch)
 
     def training_epoch_end(self, outputs):
-        self.shared_epoch_end('trn', outputs)
+        self.shared_epoch_end('train', outputs)
 
     def validation_step(self, batch, batch_idx):
         return self.shared_step('val', batch)
