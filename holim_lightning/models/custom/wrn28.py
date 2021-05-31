@@ -1,11 +1,10 @@
-import torch
 import torch.nn as nn
 
 
 class BasicBlock(nn.Module):
-    def __init__(self, cᵢ, cₒ, s=1, dropout=0, act_first=False):
+    def __init__(self, cᵢ, cₒ, s=1, dropout=0., activate_before_residual=False):
         super().__init__()
-        self.act_first = act_first
+        self.activate_before_residual = activate_before_residual
 
         # residual path
         self.conv0 = nn.Conv2d(cᵢ, cₒ, 3, s, 1, bias=False)
@@ -24,7 +23,7 @@ class BasicBlock(nn.Module):
 
     def forward(self, x):
         z = self.relu0(self.bn0(x))
-        if self.act_first:
+        if self.activate_before_residual:
             x = z
         z = self.conv0(z)
         z = self.relu1(self.bn1(z))
@@ -33,14 +32,14 @@ class BasicBlock(nn.Module):
         return x + z
 
 
-def _make_layer(n, cᵢ, cₒ, s=1, act_first=False, **kwargs):
-    layers = [BasicBlock(cᵢ, cₒ, s, act_first=act_first, **kwargs)]
+def _make_layer(n, cᵢ, cₒ, s=1, activate_before_residual=False, **kwargs):
+    layers = [BasicBlock(cᵢ, cₒ, s, activate_before_residual=activate_before_residual, **kwargs)]
     layers += [BasicBlock(cₒ, cₒ, 1, **kwargs) for _ in range(n - 1)]
     return nn.Sequential(*layers)
 
 
 class WideResNet(nn.Module):
-    def __init__(self, depth, width, num_classes=10, dropout=0, fc_dropout=0):
+    def __init__(self, depth, width, num_classes=10, dropout=0., activate_before_residual=False):
         super().__init__()
 
         assert (depth - 4) % 6 == 0
@@ -48,14 +47,13 @@ class WideResNet(nn.Module):
         c = [16, 16 * width, 32 * width, 64 * width]
 
         self.conv = nn.Conv2d(3, c[0], 3, 1, 1, bias=False)
-        self.block1 = _make_layer(n, c[0], c[1], 1, dropout=dropout, act_first=True)
+        self.block1 = _make_layer(n, c[0], c[1], 1, dropout=dropout, activate_before_residual=activate_before_residual)
         self.block2 = _make_layer(n, c[1], c[2], 2, dropout=dropout)
         self.block3 = _make_layer(n, c[2], c[3], 2, dropout=dropout)
         self.bn = nn.BatchNorm2d(c[3])
         self.relu = nn.ReLU()
         self.pool = nn.AdaptiveAvgPool2d((1, 1))
         self.flatten = nn.Flatten()
-        self.drop = nn.Dropout(fc_dropout)
         self.fc = nn.Linear(c[3], num_classes)
 
         # initialize parameters
@@ -77,4 +75,4 @@ class WideResNet(nn.Module):
         out = self.relu(self.bn(out))
         out = self.pool(out)
         out = self.flatten(out)
-        return self.fc(self.drop(out))
+        return self.fc(out)

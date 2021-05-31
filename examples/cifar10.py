@@ -143,16 +143,12 @@ if __name__ == "__main__":
             'nesterov': True
         },
         'scheduler': {
-            # 'name': 'LinearWarmupCosineAnnealingLR',
-            # 'warmup_epochs': 5 * 391,
-            # 'max_epochs': 200 * 391
-            'name': 'MultiStepLR',
-            'milestones': [60, 120, 160],
-            'gamma': 0.2
+            'name': 'LinearWarmupCosineAnnealingLR',
+            'warmup_epochs': 5 * 391,
+            'max_epochs': 200 * 391
         },
         'lr_dict': {
-            # 'interval': 'step',
-            'interval': 'epoch',
+            'interval': 'step',
             'frequency': 1
         },
         'trainer': {
