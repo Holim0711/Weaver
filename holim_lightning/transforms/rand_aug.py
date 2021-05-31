@@ -36,7 +36,7 @@ class RandAugment:
         self.m = int(m)
         self.augment_list = augment_list if augment_list else self.DEFAULT_AUGMENT_LIST
         self.color = color
-        f.check_augment_min_max(augment_list)
+        f.check_augment_min_max(self.augment_list)
 
     def transform(self, img, op, v):
         return f.__dict__[op](img, v, color=self.color)
