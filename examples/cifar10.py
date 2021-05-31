@@ -5,12 +5,9 @@ import torchmetrics
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from holim_lightning.models import get_model
-from holim_lightning.optimizers import get_optim, exclude_wd
+from holim_lightning.optimizers import get_optim
 from holim_lightning.schedulers import get_sched
 from holim_lightning.transforms import RandAugment
-
-cifar10_μ = torch.tensor([0.4914, 0.4822, 0.4465])
-cifar10_σ = torch.tensor([0.2471, 0.2435, 0.2616])
 
 
 class Module(pl.LightningModule):
@@ -21,60 +18,46 @@ class Module(pl.LightningModule):
 
         self.model = get_model(**self.hparams.model)
         self.criterion = torch.nn.CrossEntropyLoss()
-        self.train_acc = torchmetrics.Accuracy()
-        self.valid_acc = torchmetrics.Accuracy()
-        self.test_acc = torchmetrics.Accuracy()
+        self.accuracy = torch.nn.ModuleDict({
+            'train': torchmetrics.Accuracy(),
+            'val': torchmetrics.Accuracy(),
+            'test': torchmetrics.Accuracy(),
+        })
+
+    def shared_step(self, phase, batch):
+        x, y = batch
+        z = self.model(x)
+        loss = self.criterion(z, y)
+        self.accuracy[phase].update(z.softmax(dim=-1), y)
+        return {'loss': loss}
+
+    def shared_epoch_end(self, phase, outputs):
+        loss = torch.stack([x['loss'] for x in outputs]).mean()
+        acc = self.accuracy[phase].compute()
+        self.log_dict({
+            f'{phase}/loss': loss,
+            f'{phase}/acc': acc,
+            'step': self.current_epoch,
+        })
+        self.accuracy[phase].reset()
 
     def training_step(self, batch, batch_idx):
-        x, y = batch
-        z = self.model(x)
-        loss = self.criterion(z, y)
-        self.train_acc.update(z.softmax(dim=-1), y)
-        return {'loss': loss}
+        return self.shared_step('train', batch)
 
     def training_epoch_end(self, outputs):
-        loss = torch.stack([x['loss'] for x in outputs]).mean()
-        acc = self.train_acc.compute()
-        self.train_acc.reset()
-        self.log_dict({
-            'train/loss': loss,
-            'train/acc': acc,
-            'step': self.current_epoch,
-        })
+        self.shared_epoch_end('train', outputs)
 
     def validation_step(self, batch, batch_idx):
-        x, y = batch
-        z = self.model(x)
-        loss = self.criterion(z, y)
-        self.valid_acc.update(z.softmax(dim=-1), y)
-        return {'loss': loss}
+        return self.shared_step('val', batch)
 
     def validation_epoch_end(self, outputs):
-        loss = torch.stack([x['loss'] for x in outputs]).mean()
-        acc = self.valid_acc.compute()
-        self.valid_acc.reset()
-        self.log_dict({
-            'valid/loss': loss,
-            'valid/acc': acc,
-            'step': self.current_epoch,
-        })
+        self.shared_epoch_end('val', outputs)
 
     def test_step(self, batch, batch_idx):
-        x, y = batch
-        z = self.model(x)
-        loss = self.criterion(z, y)
-        self.test_acc.update(z.softmax(dim=-1), y)
-        return {'loss': loss}
+        return self.shared_step('test', batch)
 
     def test_epoch_end(self, outputs):
-        loss = torch.stack([x['loss'] for x in outputs]).mean()
-        acc = self.test_acc.compute()
-        self.test_acc.reset()
-        self.log_dict({
-            'test/loss': loss,
-            'test/acc': acc,
-            'step': self.current_epoch,
-        })
+        self.shared_epoch_end('test', outputs)
 
     def configure_optimizers(self):
         optim = get_optim(self, **self.hparams.optimizer)
@@ -91,15 +74,17 @@ class Module(pl.LightningModule):
 
 def run(hparams):
     transform_train = transforms.Compose([
-        # RandAugment(3, 5, color=tuple((cifar10_μ * 256).to(int).tolist())),
+        RandAugment(**hparams['rand_augment'], color=[125, 123, 114]),
         transforms.RandomCrop(32, padding=4, padding_mode="reflect"),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize(cifar10_μ, cifar10_σ),
+        transforms.Normalize([0.4914, 0.4822, 0.4465],
+                             [0.2471, 0.2435, 0.2616]),
     ])
     transform_valid = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize(cifar10_μ, cifar10_σ),
+        transforms.Normalize([0.4914, 0.4822, 0.4465],
+                             [0.2471, 0.2435, 0.2616]),
     ])
     dataset_train = datasets.CIFAR10(
         './data', train=True, transform=transform_train, download=True)
@@ -116,7 +101,7 @@ def run(hparams):
 
     trainer = pl.Trainer(
         callbacks=[
-            ModelCheckpoint(save_top_k=1, monitor='valid/acc'),
+            ModelCheckpoint(save_top_k=1, monitor='val/acc'),
             LearningRateMonitor(logging_interval=hparams['lr_dict']['interval']),
         ],
         **hparams['trainer'])
@@ -127,6 +112,10 @@ def run(hparams):
 
 if __name__ == "__main__":
     run({
+        'rand_augment': {
+            'n': 3,
+            'm': 5
+        },
         'dataset': {
             'batch_size': 128,
         },
