@@ -19,8 +19,8 @@ class Module(pl.LightningModule):
         self.model = get_model(**self.hparams.model)
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = torch.nn.ModuleDict({
-            'train': torchmetrics.Accuracy(),
-            'val': torchmetrics.Accuracy(),
+            'training': torchmetrics.Accuracy(),
+            'validation': torchmetrics.Accuracy(),
             'test': torchmetrics.Accuracy(),
         })
 
@@ -42,16 +42,16 @@ class Module(pl.LightningModule):
         self.accuracy[phase].reset()
 
     def training_step(self, batch, batch_idx):
-        return self.shared_step('train', batch)
+        return self.shared_step('training', batch)
 
     def training_epoch_end(self, outputs):
-        self.shared_epoch_end('train', outputs)
+        self.shared_epoch_end('training', outputs)
 
     def validation_step(self, batch, batch_idx):
-        return self.shared_step('val', batch)
+        return self.shared_step('validataion', batch)
 
     def validation_epoch_end(self, outputs):
-        self.shared_epoch_end('val', outputs)
+        self.shared_epoch_end('validataion', outputs)
 
     def test_step(self, batch, batch_idx):
         return self.shared_step('test', batch)
@@ -101,7 +101,7 @@ def run(hparams):
 
     trainer = pl.Trainer(
         callbacks=[
-            ModelCheckpoint(save_top_k=1, monitor='val/acc'),
+            ModelCheckpoint(save_top_k=1, monitor='validataion/acc'),
             LearningRateMonitor(logging_interval=hparams['lr_dict']['interval']),
         ],
         **hparams['trainer'])
