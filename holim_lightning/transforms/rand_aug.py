@@ -17,7 +17,6 @@ class RandAugment:
         ('Identity',      0, 0),
         ('AutoContrast',  0, 0),
         ('Equalize',      0, 0),
-        ('Invert',        0, 0),
         ('Posterize',     0, 4),
         ('Solarize',      0, 256),
         ('Color',         0, 0.9),
@@ -29,7 +28,6 @@ class RandAugment:
         ('TranslateY',    0, 0.453),  # (150/331)
         ('ShearX',        0, 0.3),
         ('ShearY',        0, 0.3),
-        ('Cutout',        0, 0.181),  # (60/331)
     ]
 
     def __init__(self, n, m, augment_list=None, fillcolor='black'):

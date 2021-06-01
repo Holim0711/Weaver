@@ -4,10 +4,12 @@ from torchvision import transforms, datasets
 import torchmetrics
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
+from torchvision.transforms.transforms import Lambda
 from holim_lightning.models import get_model
 from holim_lightning.optimizers import get_optim
 from holim_lightning.schedulers import get_sched
 from holim_lightning.transforms import RandAugment
+from holim_lightning.transforms.functional import Cutout
 
 
 class Module(pl.LightningModule):
@@ -75,6 +77,7 @@ class Module(pl.LightningModule):
 def run(hparams):
     transform_train = transforms.Compose([
         RandAugment(**hparams['rand_augment'], fillcolor=[125, 123, 114]),
+        transforms.Lambda(lambda x: Cutout(x, 0.5, fillcolor=(125, 123, 114))),
         transforms.RandomCrop(32, padding=4, padding_mode="reflect"),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
