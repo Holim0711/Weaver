@@ -1,5 +1,5 @@
 import PIL.ImageDraw
-import random
+from random import random
 
 
 def cutout(img, v, fillcolor='black'):
