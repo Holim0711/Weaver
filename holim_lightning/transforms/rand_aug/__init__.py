@@ -14,20 +14,20 @@ class RandAugment:
     DEFAULT_AUGMENT_LIST = [
         # RandAugment: https://arxiv.org/pdf/1909.13719.pdf
         # AutoAugment: https://arxiv.org/pdf/1805.09501.pdf
-        ('Identity',      0, 0),
-        ('AutoContrast',  0, 0),
-        ('Equalize',      0, 0),
-        ('Posterize',     0, 4),
-        ('Solarize',      0, 256),
-        ('Color',         0, 0.9),
-        ('Contrast',      0, 0.9),
-        ('Brightness',    0, 0.9),
-        ('Sharpness',     0, 0.9),
-        ('Rotate',        0, 30),
-        ('TranslateX',    0, 0.453),  # (150/331)
-        ('TranslateY',    0, 0.453),  # (150/331)
-        ('ShearX',        0, 0.3),
-        ('ShearY',        0, 0.3),
+        ('identity',      0, 0),
+        ('autocontrast',  0, 0),
+        ('equalize',      0, 0),
+        ('posterize',     4, 8),
+        ('solarize',      0, 256),
+        ('color',         0, 0.9),
+        ('contrast',      0, 0.9),
+        ('brightness',    0, 0.9),
+        ('sharpness',     0, 0.9),
+        ('rotate',        0, 30),
+        ('translateX',    0, 0.453),  # (150/331)
+        ('translateY',    0, 0.453),  # (150/331)
+        ('shearX',        0, 0.3),
+        ('shearY',        0, 0.3),
     ]
 
     def __init__(self, n, m, augment_list=None, fillcolor='black'):
