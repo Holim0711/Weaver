@@ -21,7 +21,6 @@ __all__ = [
     'TranslateY',
     'ShearX',
     'ShearY',
-    'Cutout',
 ]
 
 augment_bound = {
@@ -40,7 +39,6 @@ augment_bound = {
     'TranslateY':    (0.0, 1.0),
     'ShearX':        (0.0, 1.0),
     'ShearY':        (0.0, 1.0),
-    'Cutout':        (0.0, 1.0),
 }
 
 
@@ -126,16 +124,3 @@ def ShearX(img, v, fillcolor='black'):
 def ShearY(img, v, fillcolor='black'):
     v = _random_flip(v)
     return _affine(img, (1, 0, 0, v, 1, 0), fillcolor)
-
-
-def Cutout(img, v, fillcolor='black'):
-    w, h = img.size
-    xc = random()
-    yc = random()
-    x0 = int(max(0, w * (xc - (v / 2))))
-    y0 = int(max(0, h * (yc - (v / 2))))
-    x1 = int(min(w, w * (xc + (v / 2))))
-    y1 = int(min(h, h * (yc + (v / 2))))
-    img = img.copy()
-    PIL.ImageDraw.Draw(img).rectangle((x0, y0, x1, y1), fillcolor)
-    return img
