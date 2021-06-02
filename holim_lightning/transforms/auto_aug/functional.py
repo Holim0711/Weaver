@@ -124,4 +124,3 @@ def shearX(img, v, fillcolor='black'):
 def shearY(img, v, fillcolor='black'):
     v = _random_flip(v)
     return _affine(img, (1, 0, 0, v, 1, 0), fillcolor)
-
