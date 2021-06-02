@@ -74,7 +74,7 @@ class Module(pl.LightningModule):
 
 def run(hparams):
     transform_train = transforms.Compose([
-        # RandAugment(**hparams['rand_augment'], fillcolor=[125, 123, 114]),
+        # RandAugment(n=3, m=5, fillcolor=[125, 123, 114]),
         AutoAugment(policies='CIFAR10', fillcolor=[125, 123, 114]),
         Cutout(0.5, fillcolor=(125, 123, 114)),
         transforms.RandomCrop(32, padding=4, padding_mode="reflect"),
@@ -114,7 +114,6 @@ def run(hparams):
 
 if __name__ == "__main__":
     run({
-        # 'rand_augment': {'n': 3, 'm': 5},
         'dataset': {
             'batch_size': 128,
         },
