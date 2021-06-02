@@ -107,7 +107,7 @@ class AutoAugment:
         'autocontrast':  (0, 0),
         'equalize':      (0, 0),
         'invert':        (0, 0),
-        'posterize':     (0, 4),
+        'posterize':     (4, 8),
         'solarize':      (0, 256),
         'color':         (0, 0.9),
         'contrast':      (0, 0.9),
