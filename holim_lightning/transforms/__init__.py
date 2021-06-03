@@ -2,6 +2,7 @@ from .augments import AutoAugment, RandAugment
 from .cutout import Cutout
 from .contain_resize import ContainResize
 from .gaussian_blur import GaussianBlur
+from .twin_transforms import *
 from torchvision import transforms as vtrfm
 
 
