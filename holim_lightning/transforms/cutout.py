@@ -1,3 +1,4 @@
+from typing import Iterable
 import PIL.ImageDraw
 from random import random
 
@@ -19,6 +20,8 @@ class Cutout:
     def __init__(self, ratio, fillcolor='black'):
         self.ratio = ratio
         self.fillcolor = fillcolor
+        if isinstance(fillcolor, Iterable):
+            self.fillcolor = tuple(fillcolor)
 
     def __call__(self, img):
         return cutout(img, self.ratio, self.fillcolor)

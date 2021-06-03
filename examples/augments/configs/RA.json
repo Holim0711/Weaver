@@ -1,0 +1,44 @@
+{
+    "transform": {
+        "train": [
+            {"name": "RandAugment", "n": 3, "m": 5, "fillcolor": [125, 123, 114]},
+            {"name": "Cutout", "ratio": 0.5, "fillcolor": [125, 123, 114]},
+            {"name": "RandomCrop", "size": 32, "padding": 4, "padding_mode": "reflect"},
+            {"name": "RandomHorizontalFlip"},
+            {"name": "ToTensor"},
+            {"name": "Normalize", "dataset": "CIFAR10"}
+        ],
+        "valid": [
+            {"name": "ToTensor"},
+            {"name": "Normalize", "dataset": "CIFAR10"}
+        ]
+    },
+    "dataset": {
+        "batch_size": 128
+    },
+    "model": {
+        "src": "custom",
+        "name": "wide_resnet28_10",
+        "num_classes": 10
+    },
+    "optimizer": {
+        "name": "SGD",
+        "lr": 0.1,
+        "momentum": 0.9,
+        "weight_decay": 5e-4,
+        "nesterov": true
+    },
+    "scheduler": {
+        "name": "LinearWarmupCosineAnnealingLR",
+        "warmup_epochs": 1955,
+        "max_epochs": 78200
+    },
+    "lr_dict": {
+        "interval": "step",
+        "frequency": 1
+    },
+    "trainer": {
+        "gpus": 1,
+        "max_epochs": 200
+    }
+}

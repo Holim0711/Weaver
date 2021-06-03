@@ -1,13 +1,15 @@
 import os
+import sys
+import json
 import torch
-from torchvision import transforms, datasets
+from torchvision import datasets
 import torchmetrics
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from holim_lightning.models import get_model
 from holim_lightning.optimizers import get_optim
 from holim_lightning.schedulers import get_sched
-from holim_lightning.transforms import RandAugment, AutoAugment, Cutout
+from holim_lightning.transforms import get_trfms
 
 
 class Module(pl.LightningModule):
@@ -73,21 +75,8 @@ class Module(pl.LightningModule):
 
 
 def run(hparams):
-    transform_train = transforms.Compose([
-        # RandAugment(n=3, m=5, fillcolor=[125, 123, 114]),
-        AutoAugment(policies='CIFAR10', fillcolor=[125, 123, 114]),
-        Cutout(0.5, fillcolor=(125, 123, 114)),
-        transforms.RandomCrop(32, padding=4, padding_mode="reflect"),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize([0.4914, 0.4822, 0.4465],
-                             [0.2471, 0.2435, 0.2616]),
-    ])
-    transform_valid = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize([0.4914, 0.4822, 0.4465],
-                             [0.2471, 0.2435, 0.2616]),
-    ])
+    transform_train = get_trfms(hparams['transform']['train'])
+    transform_valid = get_trfms(hparams['transform']['valid'])
     dataset_train = datasets.CIFAR10(
         './data', train=True, transform=transform_train, download=True)
     dataset_valid = datasets.CIFAR10(
@@ -113,33 +102,6 @@ def run(hparams):
 
 
 if __name__ == "__main__":
-    run({
-        'dataset': {
-            'batch_size': 128,
-        },
-        'model': {
-            'src': 'custom',
-            'name': 'wide_resnet28_10',
-            'num_classes': 10
-        },
-        'optimizer': {
-            'name': 'SGD',
-            'lr': 0.1,
-            'momentum': 0.9,
-            'weight_decay': 5e-4,
-            'nesterov': True
-        },
-        'scheduler': {
-            'name': 'LinearWarmupCosineAnnealingLR',
-            'warmup_epochs': 5 * 391,
-            'max_epochs': 200 * 391
-        },
-        'lr_dict': {
-            'interval': 'step',
-            'frequency': 1
-        },
-        'trainer': {
-            'gpus': 1,
-            'max_epochs': 200
-        }
-    })
+    with open(sys.argv[1]) as file:
+        hparams = json.load(file)
+    run(hparams)
