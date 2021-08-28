@@ -15,4 +15,5 @@ def get_encoder(*args, **kwargs):
         raise NotImplementedError("Model not yet supported")
     else:
         raise NotImplementedError("Model not supported")
-    return model, dim
+    model.num_features = dim
+    return model
