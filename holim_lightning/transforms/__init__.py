@@ -48,6 +48,9 @@ def get_trfm(name, **kwargs):
     if name == 'Normalize' and 'dataset' in kwargs:
         return get_Normalize(**kwargs)
 
+    if name == 'RandomApply':
+        kwargs['transforms'] = [get_trfm(x) for x in kwargs['transforms']]
+
     return Transform(**kwargs)
 
 
