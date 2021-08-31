@@ -1,5 +1,5 @@
 from typing import Iterable
-from . import functional as f
+from .functional import transform, check_augment_min_max
 import random
 
 __all__ = [
@@ -9,8 +9,6 @@ __all__ = [
 
 
 class RandAugment:
-    QUANTIZE_LEVEL = 10
-
     DEFAULT_AUGMENT_LIST = [
         # RandAugment: https://arxiv.org/pdf/1909.13719.pdf
         # AutoAugment: https://arxiv.org/pdf/1805.09501.pdf
@@ -30,7 +28,7 @@ class RandAugment:
         ('shearY',        0, 0.3),
     ]
 
-    def __init__(self, n, m, augment_list=None, fillcolor='black'):
+    def __init__(self, n, m, augment_list=None, fillcolor=(128, 128, 128)):
         self.n = int(n)
         self.m = int(m)
         self.augment_list = augment_list
@@ -39,37 +37,44 @@ class RandAugment:
             self.augment_list = self.DEFAULT_AUGMENT_LIST
         if isinstance(fillcolor, Iterable):
             self.fillcolor = tuple(fillcolor)
-        f.check_augment_min_max(self.augment_list)
-
-    def transform(self, img, op, v):
-        return f.__dict__[op](img, v, fillcolor=self.fillcolor)
+        check_augment_min_max(self.augment_list)
 
     def __call__(self, img):
         ops = random.choices(self.augment_list, k=self.n)
         for op, min, max in ops:
-            v = self.m / self.QUANTIZE_LEVEL
+            v = self.m / 10
             v = v * (max - min) + min
             img = self.transform(img, op, v)
         return img
 
 
-class RandAugmentUDA(RandAugment):
+class RandAugmentUDA:
     DEFAULT_AUGMENT_LIST = [
-        ('Identity',      0, 0),
-        ('AutoContrast',  0, 0),
-        ('Equalize',      0, 0),
-        ('Posterize',     0, 4),
-        ('Solarize',      0, 256),
-        ('Color',         0.05, 0.95),
-        ('Contrast',      0.05, 0.95),
-        ('Brightness',    0.05, 0.95),
-        ('Sharpness',     0.05, 0.95),
-        ('Rotate',        0, 30),
-        ('TranslateX',    0, 0.3),
-        ('TranslateY',    0, 0.3),
-        ('ShearX',        0, 0.3),
-        ('ShearY',        0, 0.3),
+        ('identity',      0, 0),
+        ('autoContrast',  0, 0),
+        ('equalize',      0, 0),
+        ('posterize',     4, 8),
+        ('solarize',      0, 256),
+        ('color',         0.05, 0.95),
+        ('contrast',      0.05, 0.95),
+        ('brightness',    0.05, 0.95),
+        ('sharpness',     0.05, 0.95),
+        ('rotate',        0, 30),
+        ('translateX',    0, 0.3),
+        ('translateY',    0, 0.3),
+        ('shearX',        0, 0.3),
+        ('shearY',        0, 0.3),
     ]
+
+    def __init__(self, n, augment_list=None, fillcolor=(128, 128, 128)):
+        self.n = int(n)
+        self.augment_list = augment_list
+        self.fillcolor = fillcolor
+        if augment_list is None:
+            self.augment_list = self.DEFAULT_AUGMENT_LIST
+        if isinstance(fillcolor, Iterable):
+            self.fillcolor = tuple(fillcolor)
+        check_augment_min_max(self.augment_list)
 
     def __call__(self, img):
         ops = random.choices(self.augment_list, k=self.n)

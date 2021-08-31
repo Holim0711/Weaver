@@ -1,5 +1,5 @@
 from typing import Iterable
-from . import functional as f
+from .functional import transform
 import random
 
 DEFAULT_POLICIES = {
@@ -128,14 +128,11 @@ class AutoAugment:
         if isinstance(fillcolor, Iterable):
             self.fillcolor = tuple(fillcolor)
 
-    def transform(self, img, op, v):
-        return f.__dict__[op](img, v, fillcolor=self.fillcolor)
-
     def __call__(self, img):
         policy = random.choice(self.policies)
         for op, p, m in policy:
             if random.random() < p:
                 min, max = self.AUGMENT_BOUND[op]
                 v = (m / 10) * (max - min) + min
-                img = self.transform(img, op, v)
+                img = transform(img, op, v, fillcolor=self.fillcolor)
         return img

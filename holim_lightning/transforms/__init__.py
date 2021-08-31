@@ -1,4 +1,4 @@
-from .augments import AutoAugment, RandAugment
+from .augments import AutoAugment, RandAugment, RandAugmentUDA
 from .cutout import Cutout
 from .contain_resize import ContainResize
 from .gaussian_blur import GaussianBlur
@@ -36,6 +36,8 @@ def get_trfm(name, **kwargs):
         Transform = AutoAugment
     elif name == 'RandAugment':
         Transform = RandAugment
+    elif name == 'RandAugmentUDA':
+        Transform = RandAugmentUDA
     elif name == 'ContainResize':
         Transform = ContainResize
     elif name == 'Cutout':
@@ -49,7 +51,7 @@ def get_trfm(name, **kwargs):
         return get_Normalize(**kwargs)
 
     if name == 'RandomApply':
-        kwargs['transforms'] = [get_trfm(x) for x in kwargs['transforms']]
+        kwargs['transforms'] = [get_trfm(**x) for x in kwargs['transforms']]
 
     return Transform(**kwargs)
 

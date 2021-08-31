@@ -5,48 +5,9 @@ import PIL.ImageEnhance
 import PIL.ImageDraw
 
 __all__ = [
+    'transform',
     'check_augment_min_max',
-    'identity',
-    'autocontrast',
-    'equalize',
-    'invert',
-    'posterize',
-    'solarize',
-    'color',
-    'contrast',
-    'brightness',
-    'sharpness',
-    'rotate',
-    'translateX',
-    'translateY',
-    'shearX',
-    'shearY',
 ]
-
-augment_bound = {
-    'identity':      (0, 0),
-    'autocontrast':  (0, 0),
-    'equalize':      (0, 0),
-    'invert':        (0, 0),
-    'posterize':     (0, 8),
-    'solarize':      (0, 256),
-    'color':         (0.0, 1.0),
-    'contrast':      (0.0, 1.0),
-    'brightness':    (0.0, 1.0),
-    'sharpness':     (0.0, 1.0),
-    'rotate':        (0.0, 180.0),
-    'translateX':    (0.0, 1.0),
-    'translateY':    (0.0, 1.0),
-    'shearX':        (0.0, 1.0),
-    'shearY':        (0.0, 1.0),
-}
-
-
-def check_augment_min_max(augment_list):
-    for op, min, max in augment_list:
-        sub, sup = augment_bound[op]
-        assert min >= sub, f"{op} min ({min} >= {sub})"
-        assert max <= sup, f"{op} max ({max} <= {sup})"
 
 
 def _random_flip(v):
@@ -74,7 +35,7 @@ def invert(img, _, **kwargs):
 
 
 def posterize(img, v, **kwargs):
-    return PIL.ImageOps.posterize(img, 8 - round(v))
+    return PIL.ImageOps.posterize(img, max(1, 8 - round(v)))
 
 
 def solarize(img, v, **kwargs):
@@ -124,3 +85,52 @@ def shearX(img, v, fillcolor='black'):
 def shearY(img, v, fillcolor='black'):
     v = _random_flip(v)
     return _affine(img, (1, 0, 0, v, 1, 0), fillcolor)
+
+
+str2func = {
+    'identity': identity,
+    'autocontrast': autocontrast,
+    'equalize': equalize,
+    'invert': invert,
+    'posterize': posterize,
+    'solarize': solarize,
+    'color': color,
+    'contrast': contrast,
+    'brightness': brightness,
+    'sharpness': sharpness,
+    'rotate': rotate,
+    'translateX': translateX,
+    'translateY': translateY,
+    'shearX': shearX,
+    'shearY': shearY,
+}
+
+
+def transform(img, op, v, **kwargs):
+    return str2func[op](img, v, **kwargs)
+
+
+augment_bound = {
+    'identity':      (0, 0),
+    'autocontrast':  (0, 0),
+    'equalize':      (0, 0),
+    'invert':        (0, 0),
+    'posterize':     (0, 8),
+    'solarize':      (0, 256),
+    'color':         (0.0, 1.0),
+    'contrast':      (0.0, 1.0),
+    'brightness':    (0.0, 1.0),
+    'sharpness':     (0.0, 1.0),
+    'rotate':        (0.0, 180.0),
+    'translateX':    (0.0, 1.0),
+    'translateY':    (0.0, 1.0),
+    'shearX':        (0.0, 1.0),
+    'shearY':        (0.0, 1.0),
+}
+
+
+def check_augment_min_max(augment_list):
+    for op, min, max in augment_list:
+        sub, sup = augment_bound[op]
+        assert min >= sub, f"{op} min ({min} >= {sub})"
+        assert max <= sup, f"{op} max ({max} <= {sup})"
