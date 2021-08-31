@@ -44,14 +44,14 @@ class RandAugment:
         for op, min, max in ops:
             v = self.m / 10
             v = v * (max - min) + min
-            img = self.transform(img, op, v)
+            img = transform(img, op, v, fillcolor=self.fillcolor)
         return img
 
 
 class RandAugmentUDA:
     DEFAULT_AUGMENT_LIST = [
         ('identity',      0, 0),
-        ('autoContrast',  0, 0),
+        ('autocontrast',  0, 0),
         ('equalize',      0, 0),
         ('posterize',     4, 8),
         ('solarize',      0, 256),
@@ -81,5 +81,5 @@ class RandAugmentUDA:
         for op, min, max in ops:
             if random.random() < 0.5:
                 v = random.random() * (max - min) + min
-                img = self.transform(img, op, v)
+                img = transform(img, op, v, fillcolor=self.fillcolor)
         return img
