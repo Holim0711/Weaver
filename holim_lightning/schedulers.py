@@ -9,17 +9,23 @@ def get_sched(optim, name, **kwargs):
     return Scheduler(optim, **kwargs)
 
 
-def get_lr_dict(optim, scheduler, n_train_iters=None, **lr_dict):
+epoch_fields = {
+    'CosineAnnealingLR': ['T_max'],
+    'CosineAnnealingWarmRestarts': ['T_0'],
+    'LinearWarmupCosineAnnealingLR': ['warmup_epochs', 'max_epochs'],
+}
+
+
+def get_lr_dict(optim, scheduler, steps_per_epoch=None, **lr_dict):
     scheduler = dict(scheduler)
-    if lr_dict['interval'] == 'step':
-        if scheduler['name'] == 'CosineAnnealingLR':
-            scheduler['T_max'] *= n_train_iters
-        elif scheduler['name'] == 'CosineAnnealingWarmRestarts':
-            scheduler['T_0'] *= n_train_iters
-        elif scheduler['name'] == 'LinearWarmupCosineAnnealingLR':
-            scheduler['warmup_epochs'] *= n_train_iters
-            scheduler['max_epochs'] *= n_train_iters
-        elif scheduler['name'] in {'CyclicLR', 'OneCycleLR'}:
-            raise NotImplementedError("Unsupoorted lr scheduler yet")
+
+    if scheduler['name'] in {'CyclicLR', 'OneCycleLR'}:
+        raise NotImplementedError("Unsupoorted scheduler yet")
+
+    if lr_dict.get('interval') == 'step':
+        if scheduler['name'] in epoch_fields:
+            for k in epoch_fields[scheduler['name']]:
+                scheduler[k] *= steps_per_epoch
+
     lr_dict['scheduler'] = get_sched(optim, **scheduler)
     return lr_dict
