@@ -14,6 +14,7 @@
         ]
     },
     "dataset": {
+        "name": "CIFAR10",
         "batch_size": 128
     },
     "model": {
@@ -28,17 +29,12 @@
         "weight_decay": 5e-4,
         "nesterov": true
     },
-    "scheduler": {
-        "name": "LinearWarmupCosineAnnealingLR",
-        "warmup_epochs": 1955,
-        "max_epochs": 78200
-    },
     "lr_dict": {
-        "interval": "step",
-        "frequency": 1
-    },
-    "trainer": {
-        "gpus": 1,
-        "max_epochs": 200
+        "scheduler": {
+            "name": "LinearWarmupCosineAnnealingLR",
+            "warmup_epochs": 5,
+            "max_epochs": 200
+        },
+        "interval": "step"
     }
 }
