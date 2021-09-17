@@ -1,6 +1,6 @@
-# Holim Lightning
+# 🧦 MEIAS PyTorch
 
-Make hyperparameters say! Make everything string!
+Make Everything In A String!
 
 ```
 from holim_lightning.models import get_model
