@@ -1,11 +1,16 @@
-def get_sched(optim, name, **kwargs):
+import torch
+
+
+def get_scheduler(name):
     if name == 'LinearWarmupCosineAnnealingLR':
         from pl_bolts.optimizers import LinearWarmupCosineAnnealingLR
-        Scheduler = LinearWarmupCosineAnnealingLR
+        return LinearWarmupCosineAnnealingLR
     else:
-        import torch
-        Scheduler = torch.optim.lr_scheduler.__dict__[name]
+        return torch.optim.lr_scheduler.__dict__[name]
 
+
+def get_sched(optim, name, **kwargs):
+    Scheduler = get_scheduler(name)
     return Scheduler(optim, **kwargs)
 
 
