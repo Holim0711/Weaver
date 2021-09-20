@@ -1,11 +1,11 @@
-# 🧦 MEIAS PyTorch
+# Weaver PyTorch 🧶🧵
 
-Make Everything In A String!
+Make hyper-parameters strings!
 
 ```
-from holim_lightning.models import get_model
-from holim_lightning.optimizers import get_optim
-from holim_lightning.schedulers import get_sched
+from weaver.models import get_model
+from weaver.optimizers import get_optim
+from weaver.schedulers import get_sched
 
 model = get_model('torchvision', 'resnet50', pretrained=False)
 optim = get_optim(model.parameters(), name='SGD', lr=1e-3)
@@ -21,7 +21,7 @@ sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10,
 
 ### Usage
 ```
-from holim_lightning.models import get_model
+from weaver.models import get_model
 model = get_model('torchvision', 'resnet50', pretrained=False)
 model = get_model('lukemelas', 'efficientnet-b0', pretrained=True)
 model = get_model('custom', 'wide_resnet28_2')  # all custom models are not pretrained.
@@ -41,7 +41,7 @@ model = get_model('custom', 'wide_resnet28_2')  # all custom models are not pret
 Prototype: `get_optim(param, name, **kwargs)`
 
 ```
-from holim_lightning.optimizers import get_optim
+from weaver.optimizers import get_optim
 optim = get_optim(model.parameters(), name='SGD', lr=1e-3)
 ```
 
@@ -56,7 +56,7 @@ optim = get_optim(model.parameters(), name='SGD', lr=1e-3)
 Prototype: `get_sched(optim, name, **kwargs)`
 
 ```
-from holim_lightning.schedulers import get_sched
+from weaver.schedulers import get_sched
 sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10, max_epochs=100)
 ```
 
