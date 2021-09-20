@@ -1,15 +1,15 @@
 import torch
 
 
-def get_optim(module_or_params, name, **kwargs):
-    if name == 'AdaBound':
-        from adabound import AdaBound
-        Optimizer = AdaBound
-    elif name == 'LARS':
+def get_optimizer(name):
+    if name == 'LARS':
         from pl_bolts.optimizers import LARS
-        Optimizer = LARS
-    else:
-        Optimizer = torch.optim.__dict__[name]
+        return LARS
+    return torch.optim.__dict__[name]
+
+
+def get_optim(module_or_params, name, **kwargs):
+    Optimizer = get_optimizer(name)
 
     if isinstance(module_or_params, torch.nn.Module):
         module_or_params = module_or_params.parameters()
