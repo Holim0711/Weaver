@@ -1,4 +1,4 @@
-import torch
+import torch.nn as nn
 
 
 def get_model(
@@ -10,28 +10,42 @@ def get_model(
     if src == 'custom':
         from .custom import get_custom_model
         return get_custom_model(name, **kwargs)
-    elif src == 'torchvision':
+
+    if src == 'torchvision':
         from torchvision import models
         return models.__dict__[name](pretrained=pretrained, **kwargs)
-    elif src == 'lukemelas':
+
+    if src == 'lukemelas':
         from efficientnet_pytorch import EfficientNet
         if pretrained:
             return EfficientNet.from_pretrained(name, **kwargs)
         else:
             return EfficientNet.from_name(name, **kwargs)
+
+    raise ValueError(f"Unknown source: {src}")
+
+
+def change_last_fc(model, last_fc_name):
+    fc = getattr(model, last_fc_name)
+
+    if isinstance(fc, nn.Linear):
+        model.num_features = fc.in_features
+        setattr(model, last_fc_name, nn.Identity())
+    elif isinstance(fc, nn.Sequential) and isinstance(fc[-1], nn.Linear):
+        model.num_features = fc[-1].in_features
+        fc[-1] = nn.Identity()
     else:
-        raise ValueError(f"Unknown source: {src}")
+        # torchvision SqueezeNet: classifier[-1] == AvgPool...
+        raise NotImplementedError("Cannot specify where the last fc is")
+
+    return model
 
 
 def get_encoder(*args, **kwargs):
     model = get_model(*args, **kwargs)
-    if hasattr(model, 'fc') and isinstance(model.fc, torch.nn.Linear):
-        dim = model.fc.in_features
-        model.fc = torch.nn.Identity()
-    elif hasattr(model, '_fc') and isinstance(model._fc, torch.nn.Linear):
-        dim = model._fc.in_features
-        model._fc = torch.nn.Identity()
-    else:
-        raise NotImplementedError("Model not supported")
-    model.num_features = dim
-    return model
+
+    for last_fc_name in ['fc', '_fc', 'classifier']:
+        if hasattr(model, last_fc_name):
+            return change_last_fc(model, last_fc_name)
+
+    raise ValueError("Cannot specify the name of the last fc layer")
