@@ -1,10 +1,8 @@
-from .augments import AutoAugment, RandAugment, RandAugmentUDA
-from .cutout import Cutout
-from .contain_resize import ContainResize
-from .gaussian_blur import GaussianBlur
-from .twin_transforms import *
-from torchvision import transforms as vtrfm
+from torchvision import transforms
 
+__all__ = [
+    'get_trfms',
+]
 
 rgb_stats = {
     "ImageNet": {
@@ -26,35 +24,50 @@ rgb_stats = {
 }
 
 
-def get_Normalize(dataset, **kwargs):
-    kwargs.update(rgb_stats[dataset])
-    return vtrfm.Normalize(**kwargs)
+def get_trfm_class(name):
+    if name == 'AutoAugment':
+        from .augments import AutoAugment
+        return AutoAugment
+    elif name == 'RandAugment':
+        from .augments import RandAugment
+        return RandAugment
+    elif name == 'RandAugmentUDA':
+        from .augments import RandAugmentUDA
+        return RandAugmentUDA
+    elif name == 'Cutout':
+        from .cutout import Cutout
+        return Cutout
+    elif name == 'ContainResize':
+        from .contain_resize import ContainResize
+        return ContainResize
+    elif name == 'GaussianBlur':
+        from .gaussian_blur import GaussianBlur
+        return GaussianBlur
+    elif name == 'EqTwinTransform':
+        from .twin_transforms import EqTwinTransform
+        return EqTwinTransform
+    elif name == 'NqTwinTransform':
+        from .twin_transforms import NqTwinTransform
+        return NqTwinTransform
+    else:
+        return transforms.__dict__[name]
 
 
 def get_trfm(name, **kwargs):
-    if name == 'AutoAugment':
-        Transform = AutoAugment
-    elif name == 'RandAugment':
-        Transform = RandAugment
-    elif name == 'RandAugmentUDA':
-        Transform = RandAugmentUDA
-    elif name == 'ContainResize':
-        Transform = ContainResize
-    elif name == 'Cutout':
-        Transform = Cutout
-    elif name == 'GaussianBlur':
-        Transform = GaussianBlur
-    else:
-        Transform = vtrfm.__dict__[name]
+    Transform = get_trfm_class(name)
 
     if name == 'Normalize' and 'dataset' in kwargs:
-        return get_Normalize(**kwargs)
-
-    if name == 'RandomApply':
+        kwargs.update(rgb_stats[kwargs.pop('dataset')])
+    elif name == 'RandomApply':
         kwargs['transforms'] = [get_trfm(**x) for x in kwargs['transforms']]
+    elif name == 'EqTwinTransform':
+        kwargs['transforms'] = [get_trfm(**x) for x in kwargs['transforms']]
+    elif name == 'NqTwinTransform':
+        kwargs['transforms1'] = [get_trfm(**x) for x in kwargs['transforms1']]
+        kwargs['transforms2'] = [get_trfm(**x) for x in kwargs['transforms2']]
 
     return Transform(**kwargs)
 
 
 def get_trfms(kwargs_list):
-    return vtrfm.Compose([get_trfm(**x) for x in kwargs_list])
+    return transforms.Compose([get_trfm(**x) for x in kwargs_list])

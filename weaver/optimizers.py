@@ -1,7 +1,12 @@
 import torch
 
+__all__ = [
+    'get_optim',
+    'exclude_wd',
+]
 
-def get_optimizer(name):
+
+def get_optim_class(name):
     if name == 'LARS':
         from pl_bolts.optimizers import LARS
         return LARS
@@ -9,7 +14,7 @@ def get_optimizer(name):
 
 
 def get_optim(module_or_params, name, **kwargs):
-    Optimizer = get_optimizer(name)
+    Optimizer = get_optim_class(name)
 
     if isinstance(module_or_params, torch.nn.Module):
         module_or_params = module_or_params.parameters()

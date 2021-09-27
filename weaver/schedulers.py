@@ -1,7 +1,12 @@
 import torch
 
+__all__ = [
+    'get_sched',
+    'get_lr_dict',
+]
 
-def get_scheduler(name):
+
+def get_sched_class(name):
     if name == 'LinearWarmupCosineAnnealingLR':
         from pl_bolts.optimizers import LinearWarmupCosineAnnealingLR
         return LinearWarmupCosineAnnealingLR
@@ -10,7 +15,7 @@ def get_scheduler(name):
 
 
 def get_sched(optim, name, **kwargs):
-    Scheduler = get_scheduler(name)
+    Scheduler = get_sched_class(name)
     return Scheduler(optim, **kwargs)
 
 

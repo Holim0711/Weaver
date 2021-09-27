@@ -8,7 +8,7 @@ from weaver.optimizers import get_optim
 from weaver.schedulers import get_sched
 
 model = get_model('torchvision', 'resnet50', pretrained=False)
-optim = get_optim(model.parameters(), name='SGD', lr=1e-3)
+optim = get_optim(model, name='SGD', lr=1e-3)
 sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10, max_epochs=100)
 ```
 
@@ -17,49 +17,38 @@ sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10,
 ### Prototypes
 - `get_model(src, name, pretrained=False, **kwargs)`
 - `get_encoder(src, name, pretrained=False, **kwargs)`
-- Encoders are models without the last fully-connected layer
+- Encoders are just models whose last FCs are replaced by the identities!
 
-### Usage
-```
-from weaver.models import get_model
-model = get_model('torchvision', 'resnet50', pretrained=False)
-model = get_model('lukemelas', 'efficientnet-b0', pretrained=True)
-model = get_model('custom', 'wide_resnet28_2')  # all custom models are not pretrained.
-```
+### Model List
+- `'weaver'`: `'wide_resnet28_{width}'`
+- `'torchvision'`: https://pytorch.org/vision/stable/models.html
+- `'lukemelas'`: https://github.com/lukemelas/EfficientNet-PyTorch
 
-### Source List
-- torchvision: https://pytorch.org/vision/stable/models.html
-- lukemelas: https://github.com/lukemelas/EfficientNet-PyTorch
-- custom: This Repository!
-
-### Custom Model List
-- `'wide_resnet28_{width}'`
 
 ## Optimizers
-### Usage
+### Prototypes
+- `get_optim(module_or_params, name, **kwargs)`
 
-Prototype: `get_optim(param, name, **kwargs)`
-
-```
-from weaver.optimizers import get_optim
-optim = get_optim(model.parameters(), name='SGD', lr=1e-3)
-```
-
-### Source List
+### Optimizer List
 - PyTorch
 - LARS: https://github.com/PyTorchLightning/lightning-bolts
-- AdaBound: https://github.com/Luolc/AdaBound
+
 
 ## Schedulers
-### Usage
+### Prototypes
+- `get_sched(optim, name, **kwargs)`
 
-Prototype: `get_sched(optim, name, **kwargs)`
-
-```
-from weaver.schedulers import get_sched
-sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10, max_epochs=100)
-```
-
-### Source List
+### Scheduler List
 - PyTorch
 - LinearWarmupCosineAnnealingLR: https://github.com/PyTorchLightning/lightning-bolts
+
+
+## Transforms
+### Prototypes
+- `get_trfms(kwargs_list)`
+
+### Transform List
+- PyTorch
+- AutoAugment, RandAugment, RandAugmentUDA
+- Cutout, GaussianBlur, ContainResize
+- EqTwinTransform, NqTwinTransform

@@ -8,10 +8,10 @@ import torchmetrics
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 
-from holim_lightning.models import get_model
-from holim_lightning.optimizers import get_optim
-from holim_lightning.schedulers import get_lr_dict
-from holim_lightning.transforms import get_trfms
+from weaver.models import get_model
+from weaver.optimizers import get_optim
+from weaver.schedulers import get_lr_dict
+from weaver.transforms import get_trfms
 
 
 datasets = {

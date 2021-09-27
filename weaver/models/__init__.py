@@ -1,5 +1,10 @@
 import torch.nn as nn
 
+__all__ = [
+    'get_model',
+    'get_encoder',
+]
+
 
 def get_model(
     src: str,
@@ -7,7 +12,8 @@ def get_model(
     pretrained: bool = False,
     **kwargs
 ):
-    if src == 'custom':
+    if src == 'weaver':
+        assert pretrained is False, "not yet..."
         from .custom import get_custom_model
         return get_custom_model(name, **kwargs)
 
