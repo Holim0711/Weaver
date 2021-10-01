@@ -6,17 +6,24 @@ import torch
 __all__ = [
     'Dataset',
     'RandomSubset',
-    'SimpleImageDataset',
+    'SimpleDataset',
 ]
 
 
 class Dataset(torch.utils.data.Dataset):
-    def get_dataloader(self, batch_size, shuffle=False, num_workers=None, pin_memory=True, **kwargs):
+    def get_dataloader(
+        self,
+        batch_size,
+        shuffle=False,
+        num_workers=os.cpu_count(),
+        pin_memory=True,
+        **kwargs
+    ):
         return torch.utils.data.DataLoader(
             self,
             batch_size=batch_size,
             shuffle=shuffle,
-            num_workers=num_workers if num_workers else os.cpu_count(),
+            num_workers=num_workers,
             pin_memory=pin_memory,
             **kwargs)
 
@@ -33,18 +40,16 @@ class RandomSubset(Dataset):
         return self.dataset[self.indices[idx]]
 
 
-class SimpleImageDataset(Dataset):
-    def __init__(self, root, data, reader=None, transform=None, target_transform=None):
+class SimpleDataset(Dataset):
+    def __init__(self, data, reader=None, transform=None, target_transform=None):
         """ Simple Image Dataset
 
         Args
-            - root (str): root path
             - data (list): `x, y = data[i]`
             - reader (func): `x = reader(root, x)`
             - transform (func): `x = transform(x)`
             - target_transform (func): `y = target_transform(y)`
         """
-        self.root = root
         self.data = data
         self.reader = reader
         self.transform = transform
@@ -53,21 +58,15 @@ class SimpleImageDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-    def read_item(self, x):
-        if self.reader:
-            return self.reader(self.root, x)
-        else:
-            return Image.open(os.path.join(self.root, x))
-
     def __getitem__(self, idx):
         x, y = self.data[idx]
 
-        x = self.read_item(x)
+        x = x if self.reader is None else self.reader(x)
 
-        if self.transform:
+        if self.transform is not None:
             x = self.transform(x)
 
-        if self.target_transform:
+        if self.target_transform is not None:
             y = self.target_transform(y)
 
         return x, y
