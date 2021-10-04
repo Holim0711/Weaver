@@ -1,41 +1,104 @@
-import torch
-
-__all__ = [
-    'get_sched',
-    'get_lr_dict',
-]
+from math import cos, pi as π
+from torch.optim.lr_scheduler import LambdaLR
 
 
-def get_sched_class(name):
-    if name == 'LinearWarmupCosineAnnealingLR':
-        from pl_bolts.optimizers import LinearWarmupCosineAnnealingLR
-        return LinearWarmupCosineAnnealingLR
-    else:
-        return torch.optim.lr_scheduler.__dict__[name]
+__all__ = ['get_sched']
 
 
 def get_sched(optim, name, **kwargs):
-    Scheduler = get_sched_class(name)
-    return Scheduler(optim, **kwargs)
+    return {
+        'StepLR': StepLR,
+        'MultiStepLR': MultiStepLR,
+        'ExponentialLR': ExponentialLR,
+        'CosineLR': CosineLR,
+        'CosineAnnealingLR': CosineAnnealingLR,
+    }[name](optim, **kwargs)
 
 
-epoch_fields = {
-    'CosineAnnealingLR': ['T_max'],
-    'CosineAnnealingWarmRestarts': ['T_0'],
-    'LinearWarmupCosineAnnealingLR': ['warmup_epochs', 'max_epochs'],
-}
+class StepLR(LambdaLR):
+    def __init__(self, optimizer, T, γ=0.1, warmup=0, **kwargs):
+        self.T = T
+        self.γ = γ
+        self.warmup = warmup
+
+        def lr_lambda(epoch):
+            if epoch < self.warmup:
+                return epoch / self.warmup
+            return self.γ ** ((epoch - self.warmup) // self.T)
+
+        super().__init__(optimizer, lr_lambda, **kwargs)
+
+    def extend(self, m):
+        self.T *= m
+        self.warmup *= m
 
 
-def get_lr_dict(optim, scheduler, steps_per_epoch=None, **lr_dict):
-    scheduler = dict(scheduler)
+class MultiStepLR(LambdaLR):
+    def __init__(self, optimizer, milestones, γ=0.1, warmup=0, **kwargs):
+        self.milestones = milestones
+        self.γ = γ
+        self.warmup = warmup
 
-    if scheduler['name'] in {'CyclicLR', 'OneCycleLR'}:
-        raise NotImplementedError("Unsupoorted scheduler yet")
+        def lr_lambda(epoch):
+            if epoch < self.warmup:
+                return epoch / self.warmup
+            return self.γ ** sum(t <= epoch for t in self.milestones)
 
-    if lr_dict.get('interval') == 'step':
-        if scheduler['name'] in epoch_fields:
-            for k in epoch_fields[scheduler['name']]:
-                scheduler[k] *= steps_per_epoch
+        super().__init__(optimizer, lr_lambda, **kwargs)
 
-    lr_dict['scheduler'] = get_sched(optim, **scheduler)
-    return lr_dict
+    def extend(self, m):
+        self.milestones[:] = [t * m for t in self.milestones]
+        self.warmup *= m
+
+
+class ExponentialLR(LambdaLR):
+    def __init__(self, optimizer, γ, warmup=0, **kwargs):
+        self.γ = γ
+        self.warmup = warmup
+
+        def lr_lambda(epoch):
+            if epoch < self.warmup:
+                return epoch / self.warmup
+            return self.γ ** (epoch - self.warmup)
+
+        super().__init__(optimizer, lr_lambda, **kwargs)
+
+    def extend(self, m):
+        self.γ **= 1 / m
+        self.warmup *= m
+
+
+class CosineLR(LambdaLR):
+    def __init__(self, optimizer, T, ε=0, warmup=0, **kwargs):
+        self.T = T
+        self.ε = ε
+        self.warmup = warmup
+
+        def lr_lambda(epoch):
+            if epoch < self.warmup:
+                return epoch / self.warmup
+            return self.ε + (1 - self.ε) * cos((π / 2) * ((epoch - self.warmup) / (self.T - self.warmup)))
+
+        super().__init__(optimizer, lr_lambda, **kwargs)
+
+    def extend(self, m):
+        self.T *= m
+        self.warmup *= m
+
+
+class CosineAnnealingLR(LambdaLR):
+    def __init__(self, optimizer, T, ε=0, warmup=0, **kwargs):
+        self.T = T
+        self.ε = ε
+        self.warmup = warmup
+
+        def lr_lambda(epoch):
+            if epoch < self.warmup:
+                return epoch / self.warmup
+            return self.ε + (1 - self.ε) * (1 + cos(π * ((epoch - self.warmup) / (self.T - self.warmup)))) / 2
+
+        super().__init__(optimizer, lr_lambda, **kwargs)
+
+    def extend(self, m):
+        self.T *= m
+        self.warmup *= m

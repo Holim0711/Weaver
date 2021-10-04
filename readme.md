@@ -38,10 +38,12 @@ sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10,
 ### Prototypes
 - `get_sched(optim, name, **kwargs)`
 
-### Scheduler List
-- PyTorch
-- LinearWarmupCosineAnnealingLR: https://github.com/PyTorchLightning/lightning-bolts
-
+### Scheduler List (all the schedulers are custom!)
+- `StepLR(optimizer, T, γ=0.1, warmup=0, **kwargs)`
+- `MultiStepLR(optimizer, milestones, γ=0.1, warmup=0, **kwargs)`
+- `ExponentialLR(optimizer, γ, warmup=0, **kwargs)`
+- `CosineLR(optimizer, T, ε=0, warmup=0, **kwargs)`
+- `CosineAnnealingLR(optimizer, T, ε=0, warmup=0, **kwargs)`
 
 ## Transforms
 ### Prototypes
