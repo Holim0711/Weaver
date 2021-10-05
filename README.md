@@ -12,6 +12,8 @@ optim = get_optim(model, name='SGD', lr=1e-3)
 sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10, max_epochs=100)
 ```
 
+## Installation
+`pip install --index-url https://test.pypi.org/simple/ --no-deps weaver-pytorch-tools`
 
 ## Models & Encoders
 ### Prototypes
