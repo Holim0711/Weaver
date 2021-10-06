@@ -18,7 +18,7 @@
         "batch_size": 128
     },
     "model": {
-        "src": "custom",
+        "src": "weaver",
         "name": "wide_resnet28_10",
         "num_classes": 10
     },
@@ -29,12 +29,9 @@
         "weight_decay": 5e-4,
         "nesterov": true
     },
-    "lr_dict": {
-        "scheduler": {
-            "name": "LinearWarmupCosineAnnealingLR",
-            "warmup_epochs": 5,
-            "max_epochs": 200
-        },
-        "interval": "step"
+    "scheduler": {
+        "name": "CosineAnnealingLR",
+        "warmup": 5,
+        "T": 200
     }
 }

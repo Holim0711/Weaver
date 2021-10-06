@@ -10,7 +10,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 
 from weaver.models import get_model
 from weaver.optimizers import get_optim
-from weaver.schedulers import get_lr_dict
+from weaver.schedulers import get_sched
 from weaver.transforms import get_trfms
 
 
@@ -70,8 +70,9 @@ class Module(pl.LightningModule):
 
     def configure_optimizers(self):
         optim = get_optim(self, **self.hparams.optimizer)
-        sched = get_lr_dict(optim, steps_per_epoch=self.steps_per_epoch, **self.hparams.lr_dict)
-        return {'optimizer': optim, 'lr_scheduler': sched}
+        sched = get_sched(optim, **self.hparams.scheduler)
+        sched.extend(self.steps_per_epoch)
+        return {'optimizer': optim, 'lr_scheduler': {'scheduler': sched, 'interval': 'step'}}
 
 
 def run(hparams, args):
