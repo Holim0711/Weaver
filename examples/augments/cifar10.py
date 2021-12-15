@@ -58,21 +58,12 @@ class Module(pl.LightningModule):
     def validation_epoch_end(self, outputs):
         self.shared_epoch_end('val', outputs)
 
-    @property
-    def num_devices(self) -> int:
-        t = self.trainer
-        return t.num_nodes * max(t.num_processes, t.num_gpus, t.tpu_cores or 0)
-
-    @property
-    def steps_per_epoch(self) -> int:
-        num_accum = self.trainer.accumulate_grad_batches
-        return len(self.train_dataloader()) // (num_accum * self.num_devices)
-
     def configure_optimizers(self):
         optim = get_optim(self, **self.hparams.optimizer)
         sched = get_sched(optim, **self.hparams.scheduler)
-        sched.extend(self.steps_per_epoch)
-        return {'optimizer': optim, 'lr_scheduler': {'scheduler': sched, 'interval': 'step'}}
+        sched.extend(self.hparams.steps_per_epoch)
+        return {'optimizer': optim,
+                'lr_scheduler': {'scheduler': sched, 'interval': 'step'}}
 
 
 def run(hparams, args):
@@ -81,35 +72,37 @@ def run(hparams, args):
 
     num_devices = trainer.num_nodes * max(
         trainer.num_processes, trainer.num_gpus, trainer.tpu_cores or 0)
+    num_accum = trainer.accumulate_grad_batches
 
     Dataset = datasets[hparams['dataset']['name']]
-    root = os.path.join('data', hparams['dataset']['name'])
     batch_size = hparams['dataset']['batch_size'] // num_devices
+    num_workers = os.cpu_count()
 
-    transform = {
-        'train': get_trfms(hparams['transform']['train']),
-        'valid': get_trfms(hparams['transform']['valid']),
-    }
     dataset = {
-        'train': Dataset(root, train=True, transform=transform['train']),
-        'valid': Dataset(root, train=False, transform=transform['valid']),
+        'train': Dataset(args.datadir, train=True,
+                         transform=get_trfms(hparams['transform']['train'])),
+        'valid': Dataset(args.datadir, train=False,
+                         transform=get_trfms(hparams['transform']['valid'])),
     }
     dataloader = {
         'train': torch.utils.data.DataLoader(
             dataset['train'], batch_size, shuffle=True,
-            num_workers=os.cpu_count(), pin_memory=True),
+            num_workers=num_workers, pin_memory=True),
         'valid': torch.utils.data.DataLoader(
             dataset['valid'], batch_size, shuffle=False,
-            num_workers=os.cpu_count(), pin_memory=True),
+            num_workers=num_workers, pin_memory=True),
     }
 
-    model = Module(**hparams)
+    steps_per_epoch = len(dataloader['train']) // (num_accum * num_devices)
+
+    model = Module(steps_per_epoch=steps_per_epoch, **hparams)
     trainer.fit(model, dataloader['train'], dataloader['valid'])
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('config', type=str)
+    parser.add_argument('datadir', type=str)
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
