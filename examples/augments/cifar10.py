@@ -7,6 +7,7 @@ from torchvision.datasets import CIFAR10, CIFAR100
 import torchmetrics
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
+from pytorch_lightning.utilities.seed import seed_everything
 
 from weaver.models import get_model
 from weaver.optimizers import get_optim
@@ -67,6 +68,9 @@ class Module(pl.LightningModule):
 
 
 def run(hparams, args):
+    hparams['random_seed'] = args.random_seed
+    seed_everything(args.random_seed)
+
     callbacks = [ModelCheckpoint(save_top_k=0), LearningRateMonitor()]
     trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks)
 
@@ -103,6 +107,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('config', type=str)
     parser.add_argument('datadir', type=str)
+    parser.add_argument('--random_seed', type=int, default=0)
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
