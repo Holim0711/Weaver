@@ -2,7 +2,7 @@ import torch.nn as nn
 
 
 class PreActBlock(nn.Module):
-    def __init__(self, cᵢ, cₒ, s=1):
+    def __init__(self, cᵢ: int, cₒ: int, s: int):
         super().__init__()
 
         # residual path
@@ -14,28 +14,27 @@ class PreActBlock(nn.Module):
         self.relu1 = nn.ReLU()
 
         # shortcut path
-        if (cᵢ == cₒ) and (s == 1):
-            self.shortcut = nn.Identity()
-        else:
+        if (cᵢ != cₒ) or (s != 1):
             self.shortcut = nn.Conv2d(cᵢ, cₒ, 1, s, 0, bias=False)
 
     def forward(self, x):
         z = self.relu0(self.bn0(x))
+        if hasattr(self, 'shortcut'):
+            x = self.shortcut(z)
         z = self.conv0(z)
         z = self.relu1(self.bn1(z))
         z = self.conv1(z)
-        x = self.shortcut(x)
         return x + z
 
 
-def _make_layer(n, cᵢ, cₒ, s):
+def _make_layer(n: int, cᵢ: int, cₒ: int, s: int):
     layers = [PreActBlock(cᵢ, cₒ, s)]
     layers += [PreActBlock(cₒ, cₒ, 1) for _ in range(n - 1)]
     return nn.Sequential(*layers)
 
 
 class PreActResNet(nn.Module):
-    def __init__(self, num_blocks, num_classes=10):
+    def __init__(self, num_blocks: list[int], num_classes: int = 10):
         super().__init__()
 
         c = [64, 64, 128, 256, 512]
