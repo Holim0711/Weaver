@@ -14,6 +14,7 @@ class BasicBlock(nn.Module):
         # [1] https://github.com/brain-research/realistic-ssl-evaluation/blob/master/lib/networks.py
         # [2] https://github.com/google-research/mixmatch/issues/11
         self.activate_before_residual = activate_before_residual
+        self.equal_in_out = (cᵢ == cₒ)
 
         # residual path
         self.conv0 = nn.Conv2d(cᵢ, cₒ, 3, s, 1, bias=False)
@@ -25,20 +26,17 @@ class BasicBlock(nn.Module):
         self.drop = nn.Dropout(dropout)
 
         # shortcut path
-        if (cᵢ == cₒ) and (s == 1):
-            self.shortcut = nn.Identity()
-        else:
+        if (cᵢ != cₒ) or (s != 1):
             self.shortcut = nn.Conv2d(cᵢ, cₒ, 1, s, 0, bias=False)
 
     def forward(self, x):
-        z = self.relu0(self.bn0(x))
-        if self.activate_before_residual:
-            x = z
-        z = self.conv0(z)
-        z = self.relu1(self.bn1(z))
-        z = self.conv1(self.drop(z))
-        x = self.shortcut(x)
-        return x + z
+        if not self.equal_in_out and self.activate_before_residual:
+            x = self.relu0(self.bn0(x))
+        else:
+            out = self.relu0(self.bn0(x))
+        out = self.relu1(self.bn1(self.conv0(out if self.equal_in_out else x)))
+        out = self.conv1(self.drop(out))
+        return out + (x if self.equal_in_out else self.shortcut(x))
 
 
 def _make_layer(n: int, cᵢ: int, cₒ: int, s: int, **kwargs):
@@ -69,7 +67,7 @@ class WideResNet(nn.Module):
         # initialize parameters
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, negative_slope, mode='fan_out')
+                nn.init.kaiming_normal_(m.weight, mode='fan_out')
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1.0)
                 nn.init.constant_(m.bias, 0.0)
