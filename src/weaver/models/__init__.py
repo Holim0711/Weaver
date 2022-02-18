@@ -12,6 +12,9 @@ def get_model(src: str, name: str, **kwargs):
     if src == 'weaver':
         from .custom import get_custom_model
         return get_custom_model(name, **kwargs)
+    if src == 'torchssl':
+        from .torchssl import get_torchssl_model
+        return get_torchssl_model(name, **kwargs)
     if src == 'torchvision':
         import torchvision
         return torchvision.models.__dict__[name](**kwargs)
@@ -35,7 +38,7 @@ def change_fc(model, fc_name):
         model.num_features = fc.in_features
         setattr(model, fc_name, nn.Identity())
     elif isinstance(fc, nn.Sequential):
-        for i in range(len(fc) -1, -1, -1):
+        for i in range(len(fc) - 1, -1, -1):
             if isinstance(fc[i], nn.Linear):
                 model.num_features = fc[i].in_features
                 break
