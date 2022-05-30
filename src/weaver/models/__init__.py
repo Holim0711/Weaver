@@ -1,22 +1,15 @@
 import torch.nn as nn
+import torchvision
+from .custom import get_custom_classifier
 
-__all__ = [
-    'get_model',
-    'get_vectorizer',
-    'get_featurizer',
-]
+__all__ = ['get_classifier', 'get_vectorizer']
 
 
-def get_model(src: str, name: str, **kwargs):
+def get_classifier(src: str, name: str, **kwargs):
     src = src.lower()
     if src == 'weaver':
-        from .custom import get_custom_model
-        return get_custom_model(name, **kwargs)
-    if src == 'torchssl':
-        from .torchssl import get_torchssl_model
-        return get_torchssl_model(name, **kwargs)
+        return get_custom_classifier(name, **kwargs)
     if src == 'torchvision':
-        import torchvision
         return torchvision.models.__dict__[name](**kwargs)
     if src == 'cadene':
         import pretrainedmodels
@@ -35,34 +28,19 @@ def change_fc(model, fc_name):
     fc = getattr(model, fc_name)
 
     if isinstance(fc, nn.Linear):
-        model.num_features = fc.in_features
+        dim = fc.in_features
         setattr(model, fc_name, nn.Identity())
-    elif isinstance(fc, nn.Sequential):
-        for i in range(len(fc) - 1, -1, -1):
-            if isinstance(fc[i], nn.Linear):
-                model.num_features = fc[i].in_features
-                break
-            if isinstance(fc[i], nn.Conv2d) and fc[i].kernel_size == (1, 1):
-                model.num_features = fc[i].in_channels
-                break
-        else:
-            raise Exception(f"There's no FC layer in {fc_name}")
-        fc[i] = nn.Identity()
     else:
         raise NotImplementedError
 
-    return model
+    return model, dim
 
 
 def get_vectorizer(*args, **kwargs):
-    model = get_model(*args, **kwargs)
+    model = get_classifier(*args, **kwargs)
 
     for fc_name in ['fc', '_fc', 'classifier']:
         if hasattr(model, fc_name):
             return change_fc(model, fc_name)
 
     raise ValueError("Cannot specify the name of the last fc layer")
-
-
-def get_featurizer(*args, **kwargs):
-    pass
