@@ -7,7 +7,7 @@ from weaver.models import get_model
 from weaver.optimizers import get_optim
 from weaver.schedulers import get_sched
 
-model = get_model('torchvision', 'resnet50', pretrained=False)
+model = get_classifier('torchvision', 'resnet50', pretrained=False)
 optim = get_optim(model, name='SGD', lr=1e-3)
 sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10, max_epochs=100)
 ```
@@ -15,14 +15,13 @@ sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10,
 ## Installation
 `pip install --index-url https://test.pypi.org/simple/ --no-deps weaver-pytorch-tools`
 
-## Models & Encoders
+## Models
 ### Prototypes
-- `get_model(src, name, pretrained=False, **kwargs)`
-- `get_encoder(src, name, pretrained=False, **kwargs)`
-- Encoders are just models whose last FCs are replaced by the identities!
+- `get_classifier(src, name, pretrained=False, **kwargs)`
+- `get_vectorizer(src, name, pretrained=False, **kwargs)`
 
-### Model List
-- `'weaver'`: `'wide_resnet28_{width}'`
+### Classifier List
+- `'weaver'`: `'wide_resnet{depth}_{width}'`, `'preact_resnet{depth}'`
 - `'torchvision'`: https://pytorch.org/vision/stable/models.html
 - `'lukemelas'`: https://github.com/lukemelas/EfficientNet-PyTorch
 
