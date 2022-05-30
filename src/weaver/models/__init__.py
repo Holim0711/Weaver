@@ -24,7 +24,15 @@ def get_classifier(src: str, name: str, **kwargs):
     raise ValueError(f"Unknown source: {src}")
 
 
-def change_fc(model, fc_name):
+def get_vectorizer(src: str, name: str, **kwargs):
+    model = get_classifier(src, name, **kwargs)
+
+    for fc_name in ['fc', '_fc', 'classifier']:
+        if hasattr(model, fc_name):
+            break
+    else:
+        raise ValueError("Cannot specify the name of the last fc layer")
+
     fc = getattr(model, fc_name)
 
     if isinstance(fc, nn.Linear):
@@ -34,13 +42,3 @@ def change_fc(model, fc_name):
         raise NotImplementedError
 
     return model, dim
-
-
-def get_vectorizer(*args, **kwargs):
-    model = get_classifier(*args, **kwargs)
-
-    for fc_name in ['fc', '_fc', 'classifier']:
-        if hasattr(model, fc_name):
-            return change_fc(model, fc_name)
-
-    raise ValueError("Cannot specify the name of the last fc layer")
