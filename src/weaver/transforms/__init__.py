@@ -2,11 +2,11 @@ from torchvision import transforms
 from .color import DATASET_RGB_STAT
 
 __all__ = [
-    'get_transform',
+    'get_xform',
 ]
 
 
-def get_transform_class(name):
+def get_xform_class(name):
     if name == 'AutoAugment':
         from .augments import AutoAugment
         return AutoAugment
@@ -35,21 +35,19 @@ def get_transform_class(name):
         return transforms.__dict__[name]
 
 
-def get_transform(name, **kwargs):
-    Transform = get_transform_class(name)
+def get_xform(name, **kwargs):
+    Transform = get_xform_class(name)
 
     if name == 'Normalize' and 'dataset' in kwargs:
         kwargs.update(DATASET_RGB_STAT[kwargs.pop('dataset')])
+    elif name == 'Compose':
+        kwargs['transforms'] = [get_xform(**x) for x in kwargs['transforms']]
     elif name == 'RandomApply':
-        kwargs['transforms'] = [
-            get_transform(**x) for x in kwargs['transforms']]
+        kwargs['transforms'] = [get_xform(**x) for x in kwargs['transforms']]
     elif name == 'EqTwinTransform':
-        kwargs['transforms'] = [
-            get_transform(**x) for x in kwargs['transforms']]
+        kwargs['transforms'] = [get_xform(**x) for x in kwargs['transforms']]
     elif name == 'NqTwinTransform':
-        kwargs['transforms1'] = [
-            get_transform(**x) for x in kwargs['transforms1']]
-        kwargs['transforms2'] = [
-            get_transform(**x) for x in kwargs['transforms2']]
+        kwargs['transforms1'] = [get_xform(**x) for x in kwargs['transforms1']]
+        kwargs['transforms2'] = [get_xform(**x) for x in kwargs['transforms2']]
 
     return Transform(**kwargs)

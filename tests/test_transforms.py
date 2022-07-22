@@ -1,11 +1,11 @@
 import unittest
-from weaver.transforms import get_transform
+from weaver.transforms import get_xform
 
 
 class TestTransforms(unittest.TestCase):
 
     def test_transforms(self):
-        xfm = get_transform(**{
+        xform = get_xform(**{
             'name': 'NqTwinTransform',
             'transforms1': [
                 {'name': 'RandAugment', 'n': 2, 'm': 10},
@@ -24,7 +24,7 @@ class TestTransforms(unittest.TestCase):
                 {"name": "Normalize", "dataset": "ImageNet"}
             ]
         })
-        print(xfm)
+        print(xform)
 
 
 if __name__ == "__main__":
