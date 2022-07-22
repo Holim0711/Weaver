@@ -15,6 +15,13 @@ sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10,
 ## Installation
 `pip install --index-url https://test.pypi.org/simple/ --no-deps weaver-pytorch-tools`
 
+### dev
+```
+conda create --name weaver python=3
+conda install pycodestyle
+conda install pytorch torchvision ...  # see https://pytorch.org/
+```
+
 ## Models
 ### Prototypes
 - `get_classifier(src, name, pretrained=False, **kwargs)`
@@ -23,7 +30,6 @@ sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10,
 ### Classifier List
 - `'weaver'`: `'wide_resnet{depth}_{width}'`, `'preact_resnet{depth}'`
 - `'torchvision'`: https://pytorch.org/vision/stable/models.html
-- `'lukemelas'`: https://github.com/lukemelas/EfficientNet-PyTorch
 
 
 ## Optimizers
