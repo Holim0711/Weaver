@@ -1,4 +1,6 @@
+from typing import Iterable
 from PIL import Image
+from .color import getrgb
 
 
 def contain_resize(img, size, interpolation=Image.BILINEAR, fillcolor='black'):
@@ -23,6 +25,18 @@ class ContainResize():
         self.size = int(size)
         self.interpolation = interpolation
         self.fillcolor = fillcolor
+        if isinstance(fillcolor, str):
+            self.fillcolor = getrgb(fillcolor)
+        elif isinstance(fillcolor, Iterable):
+            self.fillcolor = tuple(fillcolor)
 
     def __call__(self, img):
-        return contain_resize(img, self.size, self.interpolation, self.fillcolor)
+        return contain_resize(
+            img, self.size, self.interpolation, self.fillcolor)
+
+    def __repr__(self):
+        return self.__class__.__name__ + (
+            f'(size={self.size}, '
+            f'interpolation={self.interpolation.value}, '
+            f'fillcolor={self.fillcolor})'
+        )

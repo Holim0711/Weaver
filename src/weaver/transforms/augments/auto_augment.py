@@ -1,5 +1,6 @@
 from typing import Iterable
 from .functional import transform
+from ..color import getrgb
 import random
 
 DEFAULT_POLICIES = {
@@ -120,12 +121,14 @@ class AutoAugment:
         'shearY':        (0, 0.3),
     }
 
-    def __init__(self, policies='ImageNet', fillcolor=(128, 128, 128)):
+    def __init__(self, policies='ImageNet', fillcolor='ImageNet'):
         if isinstance(policies, str):
             policies = DEFAULT_POLICIES[policies]
         self.policies = policies
         self.fillcolor = fillcolor
-        if isinstance(fillcolor, Iterable):
+        if isinstance(fillcolor, str):
+            self.fillcolor = getrgb(fillcolor)
+        elif isinstance(fillcolor, Iterable):
             self.fillcolor = tuple(fillcolor)
 
     def __call__(self, img):
@@ -136,3 +139,8 @@ class AutoAugment:
                 v = (m / 10) * (max - min) + min
                 img = transform(img, op, v, fillcolor=self.fillcolor)
         return img
+
+    def __repr__(self):
+        return self.__class__.__name__ + (
+            f'(fillcolor={self.fillcolor})'
+        )

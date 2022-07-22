@@ -1,5 +1,6 @@
 from typing import Iterable
 from .functional import transform, check_augment_min_max
+from ..color import getrgb
 import random
 
 __all__ = [
@@ -37,6 +38,8 @@ class RandAugment:
             self.augment_list = self.DEFAULT_AUGMENT_LIST
         if isinstance(fillcolor, Iterable):
             self.fillcolor = tuple(fillcolor)
+        elif isinstance(fillcolor, str):
+            self.fillcolor = getrgb(fillcolor)
         check_augment_min_max(self.augment_list)
 
     def __call__(self, img):
@@ -46,6 +49,11 @@ class RandAugment:
             v = v * (max - min) + min
             img = transform(img, op, v, fillcolor=self.fillcolor)
         return img
+
+    def __repr__(self):
+        return self.__class__.__name__ + (
+            f'(n={self.n}, m={self.m}, fillcolor={self.fillcolor})'
+        )
 
 
 class RandAugmentUDA:
@@ -72,7 +80,9 @@ class RandAugmentUDA:
         self.fillcolor = fillcolor
         if augment_list is None:
             self.augment_list = self.DEFAULT_AUGMENT_LIST
-        if isinstance(fillcolor, Iterable):
+        if isinstance(fillcolor, str):
+            self.fillcolor = getrgb(fillcolor)
+        elif isinstance(fillcolor, Iterable):
             self.fillcolor = tuple(fillcolor)
         check_augment_min_max(self.augment_list)
 
@@ -83,3 +93,8 @@ class RandAugmentUDA:
                 v = random.random() * (max - min) + min
                 img = transform(img, op, v, fillcolor=self.fillcolor)
         return img
+
+    def __repr__(self):
+        return self.__class__.__name__ + (
+            f'(n={self.n}, fillcolor={self.fillcolor})'
+        )
