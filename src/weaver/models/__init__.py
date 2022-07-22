@@ -24,18 +24,14 @@ def get_classifier(src: str, name: str, **kwargs):
 def get_vectorizer(src: str, name: str, **kwargs):
     model = get_classifier(src, name, **kwargs)
 
-    for fc_name in ['fc', '_fc', 'classifier']:
-        if hasattr(model, fc_name):
-            break
-    else:
-        raise ValueError("Cannot specify the name of the last fc layer")
+    candidates = ['fc', '_fc', 'classifier']
 
-    fc = getattr(model, fc_name)
+    for c in candidates:
+        if hasattr(model, c):
+            fc = getattr(model, c)
+            if isinstance(fc, nn.Linear):
+                setattr(model, c, nn.Identity())
+                return model
+            raise NotImplementedError(type(fc))
 
-    if isinstance(fc, nn.Linear):
-        dim = fc.in_features
-        setattr(model, fc_name, nn.Identity())
-    else:
-        raise NotImplementedError
-
-    return model, dim
+    raise ValueError(f"Cannot find {candidates}")
