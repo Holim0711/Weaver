@@ -19,7 +19,9 @@ sched = get_sched(optim, name='LinearWarmupCosineAnnealingLR', warmup_epochs=10,
 ```
 conda create --name weaver python=3
 conda install pycodestyle
-conda install pytorch torchvision ...  # see https://pytorch.org/
+conda install pytorch torchvision ...  # https://pytorch.org/
+pip install tensorboard  # https://pytorch.org/tutorials/recipes/recipes/tensorboard_with_pytorch.html#run-tensorboard
+pip install -e .
 ```
 
 ## Models
