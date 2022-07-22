@@ -1,28 +1,37 @@
-from holim_lightning.models import get_model, get_encoder
+import unittest
+import torch
+from torch.utils.tensorboard import SummaryWriter
+from weaver.models import get_classifier, get_vectorizer
 
 
-def test_torchvision():
-    model = get_model('torchvision', 'resnet18', pretrained=True)
-    print(model)
-    encoder = get_encoder('torchvision', 'resnet18', pretrained=True)
-    print(encoder)
+class TestModels(unittest.TestCase):
 
+    def visualize_models(self, src, name, input_shape, **kwargs):
+        writer = SummaryWriter(f'runs/{src}/{name}')
 
-def test_lukemelas():
-    model = get_model('lukemelas', 'efficientnet-b0', pretrained=True, advprop=True)
-    print(model)
-    encoder = get_encoder('lukemelas', 'efficientnet-b0', pretrained=False)
-    print(encoder)
+        cls = get_classifier(src, name, **kwargs)
+        vec = get_vectorizer(src, name, **kwargs)
 
+        x = torch.randn(input_shape)
 
-def test_custom():
-    model = get_model('custom', 'wide_resnet28_10', fixmatch=True)
-    print(model)
-    encoder = get_encoder('custom', 'wide_resnet28_10', fixmatch=True)
-    print(encoder)
+        writer.add_graph(cls, x)
+        writer.add_graph(vec, x)
+        writer.close()
+
+    def test_torchvision_models(self):
+        src = 'torchvision'
+        models = ['resnet18', 'efficientnet_b0']
+        input_shape = (1, 3, 224, 224)
+        for model in models:
+            self.visualize_models(src, model, input_shape)
+
+    def test_weaver_models(self):
+        src = 'weaver'
+        models = ['wide_resnet28_2', 'preact_resnet18']
+        input_shape = (1, 3, 32, 32)
+        for model in models:
+            self.visualize_models(src, model, input_shape)
 
 
 if __name__ == "__main__":
-    test_torchvision()
-    test_lukemelas()
-    test_custom()
+    unittest.main()

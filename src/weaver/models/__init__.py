@@ -27,7 +27,7 @@ def get_vectorizer(src: str, name: str, **kwargs):
                 return model  # resnet style
             elif isinstance(fc, nn.Sequential):
                 if isinstance(fc[-1], nn.Linear):
-                    fc[-1] = nn.Linear()
+                    fc[-1] = nn.Identity()
                     return model  # efficientnet style
             raise NotImplementedError(type(fc))
 
