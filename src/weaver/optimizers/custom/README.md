@@ -1,4 +1,4 @@
-# Optimizers
+# Additional Optimizers
 
 ## LARS
 - `lars.py`
