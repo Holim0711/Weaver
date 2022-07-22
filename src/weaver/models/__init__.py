@@ -11,9 +11,6 @@ def get_classifier(src: str, name: str, **kwargs):
         return get_custom_classifier(name, **kwargs)
     if src == 'torchvision':
         return torchvision.models.__dict__[name](**kwargs)
-    if src == 'cadene':
-        import pretrainedmodels
-        return pretrainedmodels.__dict__[name](**kwargs)
     if src == 'lukemelas':
         from efficientnet_pytorch import EfficientNet
         if kwargs.pop('pretrained', False):
