@@ -3,7 +3,7 @@ from weaver.models import get_classifier
 from weaver.optimizers import get_optim
 
 
-class TestModels(unittest.TestCase):
+class TestOptimizers(unittest.TestCase):
 
     def test_optimizers(self):
         model = get_classifier('torchvision', 'resnet18')
