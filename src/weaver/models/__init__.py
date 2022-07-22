@@ -24,7 +24,11 @@ def get_vectorizer(src: str, name: str, **kwargs):
             fc = getattr(model, c)
             if isinstance(fc, nn.Linear):
                 setattr(model, c, nn.Identity())
-                return model
+                return model  # resnet style
+            elif isinstance(fc, nn.Sequential):
+                if isinstance(fc[-1], nn.Linear):
+                    fc[-1] = nn.Linear()
+                    return model  # efficientnet style
             raise NotImplementedError(type(fc))
 
     raise ValueError(f"Cannot find {candidates}")
