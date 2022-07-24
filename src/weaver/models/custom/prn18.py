@@ -6,24 +6,25 @@ class PreActBlock(nn.Module):
         super().__init__()
 
         # residual path
-        self.conv0 = nn.Conv2d(cᵢ, cₒ, 3, s, 1, bias=False)
-        self.conv1 = nn.Conv2d(cₒ, cₒ, 3, 1, 1, bias=False)
-        self.bn0 = nn.BatchNorm2d(cᵢ)
-        self.bn1 = nn.BatchNorm2d(cₒ)
-        self.relu0 = nn.ReLU()
+        self.conv1 = nn.Conv2d(cᵢ, cₒ, 3, s, 1, bias=False)
+        self.conv2 = nn.Conv2d(cₒ, cₒ, 3, 1, 1, bias=False)
+        self.bn1 = nn.BatchNorm2d(cᵢ)
+        self.bn2 = nn.BatchNorm2d(cₒ)
         self.relu1 = nn.ReLU()
+        self.relu2 = nn.ReLU()
 
         # shortcut path
-        if (cᵢ != cₒ) or (s != 1):
+        if (cᵢ == cₒ) and (s == 1):
+            self.shortcut = nn.Identity()
+        else:
             self.shortcut = nn.Conv2d(cᵢ, cₒ, 1, s, 0, bias=False)
 
     def forward(self, x):
-        z = self.relu0(self.bn0(x))
-        if hasattr(self, 'shortcut'):
-            x = self.shortcut(z)
-        z = self.conv0(z)
-        z = self.relu1(self.bn1(z))
+        z = self.relu1(self.bn1(x))
+        x = self.shortcut(z)
         z = self.conv1(z)
+        z = self.relu2(self.bn2(z))
+        z = self.conv2(z)
         return x + z
 
 
@@ -44,7 +45,7 @@ class PreActResNet(nn.Module):
         self.block2 = _make_layer(num_blocks[1], c[1], c[2], 2)
         self.block3 = _make_layer(num_blocks[2], c[2], c[3], 2)
         self.block4 = _make_layer(num_blocks[3], c[3], c[4], 2)
-        self.pool = nn.AdaptiveAvgPool2d((1, 1))
+        self.pool = nn.AdaptiveAvgPool2d(1)
         self.flatten = nn.Flatten()
         self.fc = nn.Linear(c[-1], num_classes)
 
