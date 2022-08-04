@@ -70,5 +70,5 @@ class PreActResNet(nn.Module):
         return self.fc(out)
 
 
-def PreActResNet18():
-    return PreActResNet([2, 2, 2, 2])
+def PreActResNet18(**kwargs):
+    return PreActResNet([2, 2, 2, 2], **kwargs)
