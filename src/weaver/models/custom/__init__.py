@@ -14,5 +14,5 @@ def get_custom_classifier(name, **kwargs):
         return WideResNet(depth, width, **kwargs)
     if name == 'preact_resnet18':
         from .prn18 import PreActResNet18
-        return PreActResNet18()
+        return PreActResNet18(**kwargs)
     raise ValueError(f"Unsupported model: {name}")
