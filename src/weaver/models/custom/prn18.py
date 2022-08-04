@@ -14,14 +14,13 @@ class PreActBlock(nn.Module):
         self.relu2 = nn.ReLU()
 
         # shortcut path
-        if (cᵢ == cₒ) and (s == 1):
-            self.shortcut = nn.Identity()
-        else:
+        if (cᵢ != cₒ) or (s != 1):
             self.shortcut = nn.Conv2d(cᵢ, cₒ, 1, s, 0, bias=False)
 
     def forward(self, x):
         z = self.relu1(self.bn1(x))
-        x = self.shortcut(z)
+        if hasattr(self, 'shortcut'):
+            x = self.shortcut(z)
         z = self.conv1(z)
         z = self.relu2(self.bn2(z))
         z = self.conv2(z)
