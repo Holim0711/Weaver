@@ -36,10 +36,10 @@ class RandAugment:
         self.fillcolor = fillcolor
         if augment_list is None:
             self.augment_list = self.DEFAULT_AUGMENT_LIST
-        if isinstance(fillcolor, Iterable):
-            self.fillcolor = tuple(fillcolor)
-        elif isinstance(fillcolor, str):
+        if isinstance(fillcolor, str):
             self.fillcolor = getrgb(fillcolor)
+        elif isinstance(fillcolor, Iterable):
+            self.fillcolor = tuple(fillcolor)
         check_augment_min_max(self.augment_list)
 
     def __call__(self, img):
