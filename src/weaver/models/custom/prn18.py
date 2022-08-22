@@ -44,6 +44,9 @@ class PreActResNet(nn.Module):
         self.block2 = _make_layer(num_blocks[1], c[1], c[2], 2)
         self.block3 = _make_layer(num_blocks[2], c[2], c[3], 2)
         self.block4 = _make_layer(num_blocks[3], c[3], c[4], 2)
+
+        self.bn = nn.BatchNorm2d(c[-1])
+        self.relu = nn.ReLU(inplace=True)
         self.pool = nn.AdaptiveAvgPool2d(1)
         self.flatten = nn.Flatten()
         self.fc = nn.Linear(c[-1], num_classes)
@@ -65,6 +68,7 @@ class PreActResNet(nn.Module):
         out = self.block2(out)
         out = self.block3(out)
         out = self.block4(out)
+        out = self.relu(self.bn(out))
         out = self.pool(out)    # out = F.avg_pool2d(out, 4)
         out = self.flatten(out)
         return self.fc(out)
