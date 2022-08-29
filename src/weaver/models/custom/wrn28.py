@@ -2,12 +2,8 @@ import torch.nn as nn
 
 
 class BasicBlock(nn.Module):
-    def __init__(self, cᵢ: int, cₒ: int, s: int, activate_before_residual: bool = False):
+    def __init__(self, cᵢ: int, cₒ: int, s: int):
         super().__init__()
-
-        # Why using `activate_before_residual`
-        # → https://github.com/google-research/mixmatch/issues/11
-        self.activate_before_residual = activate_before_residual
 
         # residual path
         self.conv1 = nn.Conv2d(cᵢ, cₒ, 3, s, 1, bias=False)
@@ -18,19 +14,16 @@ class BasicBlock(nn.Module):
         self.relu2 = nn.ReLU(inplace=True)
 
         # shortcut path
-        if (cᵢ == cₒ) and (s == 1):
-            self.shortcut = nn.Identity()
-        else:
+        if (cᵢ != cₒ) or (s != 1):
             self.shortcut = nn.Conv2d(cᵢ, cₒ, 1, s, 0, bias=False)
 
     def forward(self, x):
         z = self.relu1(self.bn1(x))
-        if self.activate_before_residual:
-            x = z
+        if hasattr(self, 'shortcut'):
+            x = self.shortcut(z)
         z = self.conv1(z)
         z = self.relu2(self.bn2(z))
         z = self.conv2(z)
-        x = self.shortcut(x)
         return x + z
 
 
