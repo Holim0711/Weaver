@@ -36,7 +36,7 @@ class WideResNet(nn.Module):
         c = [16, 16 * width, 32 * width, 64 * width]
 
         self.conv0 = nn.Conv2d(3, c[0], 3, 1, 1, bias=False)
-        self.block1 = self._make_layer(n, c[0], c[1], 1, activate_before_residual=True)
+        self.block1 = self._make_layer(n, c[0], c[1], 1)
         self.block2 = self._make_layer(n, c[1], c[2], 2)
         self.block3 = self._make_layer(n, c[2], c[3], 2)
 
@@ -48,9 +48,9 @@ class WideResNet(nn.Module):
 
         self.init_params()
 
-    def _make_layer(self, n, cᵢ, cₒ, s, activate_before_residual=False):
+    def _make_layer(self, n, cᵢ, cₒ, s):
         return nn.Sequential(*[
-            BasicBlock(cᵢ, cₒ, s, activate_before_residual),
+            BasicBlock(cᵢ, cₒ, s),
             *[BasicBlock(cₒ, cₒ, 1) for _ in range(1, n)]
         ])
 
