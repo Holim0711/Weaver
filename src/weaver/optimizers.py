@@ -3,17 +3,14 @@ import torch
 __all__ = ['get_optim', 'exclude_wd']
 
 
-def get_optim(module_or_params, name, **kwargs):
+def get_optim(params, name, **kwargs):
     if name == 'AdaBelief':
         from adabelief_pytorch import AdaBelief
         Optimizer = AdaBelief
     else:
         Optimizer = torch.optim.__dict__[name]
 
-    if isinstance(module_or_params, torch.nn.Module):
-        module_or_params = module_or_params.parameters()
-
-    return Optimizer(module_or_params, **kwargs)
+    return Optimizer(params, **kwargs)
 
 
 def exclude_wd(module, skip_list=['bias', 'bn']):
