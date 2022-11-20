@@ -14,7 +14,7 @@ class HalfCosineAnnealingLR(lr_scheduler.LambdaLR):
 def get_scheduler(optim, name, **kwargs):
     if 'schedulers' in kwargs:
         kwargs['schedulers'] = [
-            get_sched(optim, **child_sched_kwargs)
+            get_scheduler(optim, **child_sched_kwargs)
             for child_sched_kwargs in kwargs['schedulers']
         ]
 
