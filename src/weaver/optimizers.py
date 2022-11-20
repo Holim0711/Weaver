@@ -1,9 +1,9 @@
 import torch
 
-__all__ = ['get_optim', 'exclude_wd']
+__all__ = ['get_optimizer', 'exclude_wd']
 
 
-def get_optim(params, name, **kwargs):
+def get_optimizer(params, name, **kwargs):
     if name == 'AdaBelief':
         from adabelief_pytorch import AdaBelief
         Optimizer = AdaBelief

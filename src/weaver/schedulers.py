@@ -1,7 +1,7 @@
 import math
 from torch.optim import lr_scheduler
 
-__all__ = ['get_sched']
+__all__ = ['get_scheduler']
 
 
 class HalfCosineAnnealingLR(lr_scheduler.LambdaLR):
@@ -11,7 +11,7 @@ class HalfCosineAnnealingLR(lr_scheduler.LambdaLR):
         super().__init__(optimizer, _lr_lambda, last_epoch, verbose)
 
 
-def get_sched(optim, name, **kwargs):
+def get_scheduler(optim, name, **kwargs):
     if 'schedulers' in kwargs:
         kwargs['schedulers'] = [
             get_sched(optim, **child_sched_kwargs)
