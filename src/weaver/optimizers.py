@@ -1,6 +1,6 @@
 import torch
 
-__all__ = ['get_optimizer', 'exclude_wd']
+__all__ = ['get_optimizer', 'exclude_wd', 'EMAModel']
 
 
 def get_optimizer(params, name, **kwargs):
@@ -26,3 +26,14 @@ def exclude_wd(module, skip_list=['bias', 'bn']):
             params.append(param)
 
     return [{'params': params}, {'params': excluded_params, 'weight_decay': 0}]
+
+
+class EMAModel(torch.optim.swa_utils.AveragedModel):
+    def __init__(self, model: torch.nn.Module, alpha: float):
+        super().__init__(model, avg_fn=lambda m, x, _: alpha*m + (1-alpha)*x)
+
+    def update_parameters(self, model):
+        super().update_parameters(model)
+        # BatchNorm buffers are already EMA
+        for a, b in zip(self.module.buffers(), model.buffers()):
+            a.copy_(b.to(a.device))
