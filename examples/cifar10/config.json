@@ -14,7 +14,7 @@
         ]
     },
     "dataset": {
-        "root": "data/cifar10",
+        "root": "/datasets/CIFAR-10",
         "batch_size": 128
     },
     "model": {
