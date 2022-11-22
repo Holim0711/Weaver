@@ -9,9 +9,9 @@ model = get_classifier('torchvision', 'resnet50')
 optim = get_optimizer(model.parameters(), name='SGD', lr=1e-3)
 sched = get_scheduler(optimizer, name='CosineAnnealingLR', T_max=10)
 transform = Compose(get_transforms([
-    {'name': 'RandAugment', 'n': 2, 'm': 10},
+    {'name': 'RandAugment', 'num_ops': 2, 'magnitude': 10},
     {"name": "ToTensor"},
-    {"name": "Normalize", "dataset": "CIFAR10"}
+    {"name": "Normalize", "mean": "cifar10", "std": "cifar10"}
 ]))
 ```
 
