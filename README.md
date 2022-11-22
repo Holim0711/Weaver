@@ -13,29 +13,31 @@ transform = Compose(get_transforms([
 ]))
 ```
 
-## Installation
+## Install
 ```bash
 pip install .
 ```
 
-## Docs
-### `get_classifier(src: str, name: str, **kwargs)`
+---------------------------------------
+
+## API
+### get_classifier(src, name, **kwargs)
 - weaver: `wide_resnet{depth}_{width}`, `preact_resnet{depth}`
 - torchvision: https://pytorch.org/vision/stable/models.html
 
-### `get_optimizer(params: list[Parameter], name: str, **kwargs)`
+### get_optimizer(params, name, **kwargs)
 - PyTorch: https://pytorch.org/docs/stable/optim.html#algorithms
 - AdaBelief: https://github.com/juntang-zhuang/Adabelief-Optimizer
 
-### `get_scheduler(optim: Optimizer, name: str, **kwargs)`
+### get_scheduler(optim, name, **kwargs)
 - PyTorch: https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
 - Custom: `HalfCosineAnnealingLR`
 
-### `get_transform(name: str, **kwargs)`
+### get_transform(name, **kwargs)
 - PyTorch: https://pytorch.org/vision/stable/transforms.html
 - Custom: `AllRandAugment`, `Cutout`, `Contain`
 
-### `get_transforms(kwargs_list: list[dict])`
+### get_transforms(kwargs_list)
 - get list of transforms
 
 ### Others
