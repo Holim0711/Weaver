@@ -3,65 +3,53 @@
 Make hyper-parameters strings!
 
 ```
-from weaver.models import get_classifier
-from weaver.optimizers import get_optim
-from weaver.schedulers import get_sched
-from weaver.transforms import get_xform
-
+from weaver import get_classifier, get_optimizer, get_scheduler, get_transforms
+from torchvision.transforms import Compose
 model = get_classifier('torchvision', 'resnet50')
-optim = get_optim(model, name='SGD', lr=1e-3)
-sched = get_sched(optim, name='CosineAnnealingLR', T_max=10)
-xform = get_xform('Compose', transforms=[
+optim = get_optimizer(model.parameters(), name='SGD', lr=1e-3)
+sched = get_scheduler(optimizer, name='CosineAnnealingLR', T_max=10)
+transform = Compose(get_transforms([
     {'name': 'RandAugment', 'n': 2, 'm': 10},
     {"name": "ToTensor"},
     {"name": "Normalize", "dataset": "CIFAR10"}
-])
+]))
 ```
 
 ## Installation
-`pip install --index-url https://test.pypi.org/simple/ --no-deps weaver-pytorch-tools`
-
-### dev
-```
-conda create --name weaver python=3
-conda install pycodestyle
-conda install pytorch torchvision ...  # https://pytorch.org/
-pip install tensorboard  # https://pytorch.org/tutorials/recipes/recipes/tensorboard_with_pytorch.html#run-tensorboard
-pip install -e .
-```
+`pip install .`
 
 ## Models
 ### Prototypes
-- `get_classifier(src, name, **kwargs)`
-- `get_featurizer(src, name, **kwargs)`
+- `get_classifier(src: str, name: str, **kwargs)`
 
-### Classifier List
+### Classifier `(src, name)` List
 - `'weaver'`: `'wide_resnet{depth}_{width}'`, `'preact_resnet{depth}'`
 - `'torchvision'`: https://pytorch.org/vision/stable/models.html
 
 
 ## Optimizers
 ### Prototypes
-- `get_optim(module_or_params, name, **kwargs)`
+- `get_optimizer(params: list, name: str, **kwargs)`
+- `exclude_wd(module: torch.nn.Module, skip_list=['bias', 'bn'])`
+- `EMAModel(model: torch.nn.Module, alpha: float)`
 
 ### Optimizer List
 - PyTorch: https://pytorch.org/docs/stable/optim.html#algorithms
-- LARS: https://github.com/PyTorchLightning/lightning-bolts
+- AdaBelief: https://github.com/juntang-zhuang/Adabelief-Optimizer
 
 
 ## Schedulers
 ### Prototypes
-- `get_sched(optim, name, **kwargs)`
+- `get_scheduler(optim: Optimizer, name: str, **kwargs)`
 
 ### Scheduler List
 - PyTorch: https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
 
 ## Transforms
 ### Prototypes
-- `get_trfms(kwargs_list)`
+- `get_transform(name: str, **kwargs)`
+- `get_transforms(kwargs_list: list)`
 
 ### Transform List
 - PyTorch: https://pytorch.org/vision/stable/transforms.html
-- AutoAugment, RandAugment, RandAugmentUDA
-- Cutout, GaussianBlur, ContainResize
-- EqTwinTransform, NqTwinTransform
+- Custom: `AllRandAugment`, `Cutout`, `Contain`
