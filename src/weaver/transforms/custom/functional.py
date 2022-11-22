@@ -1,5 +1,4 @@
 from typing import Union
-from math import sqrt
 from PIL import Image, ImageDraw
 from torch import rand
 from torchvision.transforms import InterpolationMode
@@ -30,7 +29,7 @@ def cutout(
     ratio: float,
     fill: Union[str, list[float]] = 'black',
 ) -> Image.Image:
-    v = sqrt(ratio) / 2
+    v = ratio / 2
     w, h = img.size
     x, y = rand(2)
     x0 = int(max(0, w * (x - v)))
