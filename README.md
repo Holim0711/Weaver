@@ -5,7 +5,7 @@ from weaver import get_classifier, get_optimizer, get_scheduler, get_transforms
 from torchvision.transforms import Compose
 model = get_classifier('torchvision', 'resnet50')
 optim = get_optimizer(model.parameters(), name='SGD', lr=1e-3)
-sched = get_scheduler(optimizer, name='CosineAnnealingLR', T_max=10)
+sched = get_scheduler(optim, name='CosineAnnealingLR', T_max=10)
 transform = Compose(get_transforms([
     {'name': 'RandAugment', 'num_ops': 2, 'magnitude': 10},
     {"name": "ToTensor"},
