@@ -15,7 +15,7 @@ transform = Compose(get_transforms([
 
 ## Install
 ```bash
-pip install .
+pip install weaver-pytorch-rnx0dvmdxk
 ```
 
 ---------------------------------------
