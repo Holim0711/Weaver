@@ -1,8 +1,6 @@
 # Weaver PyTorch 🧶🧵
 
-Make hyper-parameters strings!
-
-```
+```python
 from weaver import get_classifier, get_optimizer, get_scheduler, get_transforms
 from torchvision.transforms import Compose
 model = get_classifier('torchvision', 'resnet50')
@@ -16,40 +14,30 @@ transform = Compose(get_transforms([
 ```
 
 ## Installation
-`pip install .`
+```bash
+pip install .
+```
 
-## Models
-### Prototypes
-- `get_classifier(src: str, name: str, **kwargs)`
+## Docs
+### `get_classifier(src: str, name: str, **kwargs)`
+- weaver: `wide_resnet{depth}_{width}`, `preact_resnet{depth}`
+- torchvision: https://pytorch.org/vision/stable/models.html
 
-### Classifier `(src, name)` List
-- `'weaver'`: `'wide_resnet{depth}_{width}'`, `'preact_resnet{depth}'`
-- `'torchvision'`: https://pytorch.org/vision/stable/models.html
-
-
-## Optimizers
-### Prototypes
-- `get_optimizer(params: list, name: str, **kwargs)`
-- `exclude_wd(module: torch.nn.Module, skip_list=['bias', 'bn'])`
-- `EMAModel(model: torch.nn.Module, alpha: float)`
-
-### Optimizer List
+### `get_optimizer(params: list[Parameter], name: str, **kwargs)`
 - PyTorch: https://pytorch.org/docs/stable/optim.html#algorithms
 - AdaBelief: https://github.com/juntang-zhuang/Adabelief-Optimizer
 
-
-## Schedulers
-### Prototypes
-- `get_scheduler(optim: Optimizer, name: str, **kwargs)`
-
-### Scheduler List
+### `get_scheduler(optim: Optimizer, name: str, **kwargs)`
 - PyTorch: https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+- Custom: `HalfCosineAnnealingLR`
 
-## Transforms
-### Prototypes
-- `get_transform(name: str, **kwargs)`
-- `get_transforms(kwargs_list: list)`
-
-### Transform List
+### `get_transform(name: str, **kwargs)`
 - PyTorch: https://pytorch.org/vision/stable/transforms.html
 - Custom: `AllRandAugment`, `Cutout`, `Contain`
+
+### `get_transforms(kwargs_list: list[dict])`
+- get list of transforms
+
+### Others
+- `weaver.optimizers.exclude_wd(module: Module, skip_list=['bias', 'bn'])`
+- `weaver.optimizers.EMAModel(model: Module, alpha: float)`
