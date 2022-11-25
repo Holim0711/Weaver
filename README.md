@@ -43,3 +43,5 @@ pip install weaver-pytorch-rnx0dvmdxk
 ### Others
 - `weaver.optimizers.exclude_wd(module: Module, skip_list=['bias', 'bn'])`
 - `weaver.optimizers.EMAModel(model: Module, alpha: float)`
+- `weaver.datasets.IndexedDataset`
+- `weaver.datasets.RandomSubset`
