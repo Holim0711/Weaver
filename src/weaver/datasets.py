@@ -1,3 +1,4 @@
+from typing import Union
 from torch.utils.data import Dataset, Subset
 import numpy as np
 
@@ -33,10 +34,13 @@ class RandomSubset(Subset):
     def __init__(
         self,
         dataset: Dataset,
-        length: int,
+        length: Union[int, float],
         class_balanced: bool = False,
         random_seed: int = 0,
     ):
+        if length < 1.0:
+            length = round(len(dataset) * length)
+
         random_state = np.random.RandomState(random_seed)
         if not class_balanced:
             indices = random_state.choice(len(dataset), length, replace=False)
