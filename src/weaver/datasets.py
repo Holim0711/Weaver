@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, Subset
 import numpy as np
 
 
-__all__ = ['IndexedDataset', 'RandomSubset']
+__all__ = ['IndexedDataset', 'RandomSubset', 'FewShotSubset']
 
 
 class IndexedDataset(Dataset):
